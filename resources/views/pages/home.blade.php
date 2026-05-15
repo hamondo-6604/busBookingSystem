@@ -8,7 +8,8 @@
 <style>
   .hero-swiper { width: 100%; height: calc(100vh - calc(64px * 2)); min-height: 500px; position: relative; }
   .swiper-slide { position: relative; background-color: #0f172a; overflow: hidden; }
-  .swiper-slide img { width: 100%; height: 100%; object-fit: cover; object-position: center; opacity: 0.6; }
+  .swiper-slide img { width: 100%; height: 100%; object-fit: cover; object-position: center; opacity: 0.65; image-rendering: auto; }
+  .hero-bg-img { min-width: 100%; min-height: 100%; }
   .hero-overlay { position: absolute; inset: 0; background: linear-gradient(to right, rgba(15,23,42,0.9) 0%, rgba(15,23,42,0.4) 100%); }
   
   .search-widget-container {
@@ -25,6 +26,7 @@
     <div class="swiper-wrapper">
       @php
           $heroSlides = $cmsSettings['hero_slides'] ?? [];
+          $heroFromCms = !empty($heroSlides);
           if (empty($heroSlides)) {
               $heroSlides = [
                   [
@@ -49,8 +51,22 @@
           }
       @endphp
       @foreach($heroSlides as $index => $slide)
+      @php
+          $rawImage = $slide['image'] ?? '';
+          $fallback = 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&q=85&w=2400';
+          $heroImg = \App\Services\Cloudinary::heroImageSrcset($rawImage ?: null);
+          $heroSrc = $heroImg['src'] ?? \App\Services\Cloudinary::heroImageUrl($fallback);
+          $heroSrcset = $heroImg['srcset'] ?? null;
+      @endphp
       <div class="swiper-slide">
-        <img src="{{ !empty($slide['image']) ? $slide['image'] : 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&q=80&w=2000' }}" alt="Hero Image" loading="{{ $index === 0 ? 'eager' : 'lazy' }}" fetchpriority="{{ $index === 0 ? 'high' : 'auto' }}" decoding="async">
+        <img src="{{ $heroSrc }}"
+             @if($heroSrcset) srcset="{{ $heroSrcset }}" @endif
+             sizes="100vw"
+             class="hero-bg-img"
+             alt="{{ strip_tags($slide['title'] ?? 'Hero') }}"
+             loading="{{ $index === 0 ? 'eager' : 'lazy' }}"
+             fetchpriority="{{ $index === 0 ? 'high' : 'auto' }}"
+             decoding="async">
         <div class="hero-overlay"></div>
         <div class="absolute inset-0 flex items-center">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-10">
@@ -65,7 +81,7 @@
                 <p class="text-slate-300 text-lg leading-relaxed mb-8 max-w-lg">
                   {{ $slide['subtitle'] }}
                 </p>
-                @if($index === 0)
+                @if(!empty($slide['show_trust_badges']) || (!$heroFromCms && $index === 0))
                 <div class="flex flex-wrap gap-5">
                   @foreach([
                     ['shield-check', 'LTO Accredited'],
@@ -77,13 +93,21 @@
                     </div>
                   @endforeach
                 </div>
-                @elseif($index === 1)
+                @endif
+                @if(!empty($slide['cta_text']))
+                <div class="flex flex-wrap gap-3">
+                  <a href="{{ $slide['cta_url'] ?: route('landing.booking_routes') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-white text-slate-900 font-bold text-sm rounded-xl hover:bg-slate-100 transition-colors">
+                    {{ $slide['cta_text'] }}
+                  </a>
+                </div>
+                @elseif(!$heroFromCms && $index === 1)
                 <div class="flex flex-wrap gap-3">
                   <a href="{{ route('landing.booking_routes') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-white text-slate-900 font-bold text-sm rounded-xl hover:bg-slate-100 transition-colors">
                     Browse Routes
                   </a>
                 </div>
-                @elseif($index === 2)
+                @endif
+                @if(!empty($slide['show_live_stats']) || (!$heroFromCms && $index === 2))
                 <div class="inline-flex items-center gap-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl px-6 py-4">
                   <div class="flex items-center gap-2">
                     <div class="w-3 h-3 bg-emerald-400 rounded-full animate-pulse"></div>

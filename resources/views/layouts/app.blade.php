@@ -272,6 +272,25 @@
       border: 1px solid var(--border-primary);
     }
 
+    /* Passenger type cards — unselected in register form */
+    [data-theme="dark"] .ptype-card:not(:has(input:checked)) {
+      background-color: var(--bg-tertiary) !important;
+      border-color: var(--border-primary) !important;
+    }
+    [data-theme="dark"] .ptype-card:not(:has(input:checked)) .ptype-title {
+      color: var(--text-secondary) !important;
+    }
+    [data-theme="dark"] .ptype-card:not(:has(input:checked)) .ptype-subtitle {
+      color: var(--text-tertiary) !important;
+    }
+    [data-theme="dark"] .ptype-card:not(:has(input:checked)) .ptype-subtitle.text-emerald-600 {
+      color: var(--accent-success) !important;
+    }
+    [data-theme="dark"] .ptype-card:not(:has(input:checked)) .ptype-check-off {
+      background-color: var(--bg-secondary) !important;
+      border-color: var(--border-secondary) !important;
+    }
+
     /* Dark Mode Scrollbar */
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: var(--bg-secondary); }

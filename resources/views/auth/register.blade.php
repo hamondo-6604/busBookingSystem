@@ -64,12 +64,12 @@
         @foreach($discountTypes as $dt)
           @php
             $cfg = [
-              'regular'        => ['user',           'border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800/50',       'border-primary-500 bg-primary-50 dark:bg-primary-900/30 dark:border-primary-500 ring-1 ring-primary-400 dark:ring-primary-500'],
-              'senior_citizen' => ['user-check',     'border-amber-200 bg-amber-50/50 dark:border-slate-700 dark:bg-slate-800/50',    'border-amber-500  bg-amber-50 dark:bg-amber-900/30  dark:border-amber-500 ring-1 ring-amber-400 dark:ring-amber-500'],
-              'pwd'            => ['accessibility',  'border-blue-200  bg-blue-50/50 dark:border-slate-700 dark:bg-slate-800/50',     'border-blue-500   bg-blue-50 dark:bg-blue-900/30    dark:border-blue-500 ring-1 ring-blue-400 dark:ring-blue-500'],
-              'student'        => ['graduation-cap', 'border-violet-200 bg-violet-50/50 dark:border-slate-700 dark:bg-slate-800/50',  'border-violet-500 bg-violet-50 dark:bg-violet-900/30  dark:border-violet-500 ring-1 ring-violet-400 dark:ring-violet-500'],
+              'regular'        => ['user',           'border-slate-200 bg-slate-50',       'border-primary-500 bg-primary-50 ring-1 ring-primary-400'],
+              'senior_citizen' => ['user-check',     'border-amber-200 bg-amber-50',    'border-amber-500  bg-amber-50 ring-1 ring-amber-400'],
+              'pwd'            => ['accessibility',  'border-blue-200  bg-blue-50',     'border-blue-500   bg-blue-50 ring-1 ring-blue-400'],
+              'student'        => ['graduation-cap', 'border-violet-200 bg-violet-50',  'border-violet-500 bg-violet-50 ring-1 ring-violet-400'],
             ];
-            [$ico, $baseCls, $selCls] = $cfg[$dt->name] ?? ['user','border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800/50','border-primary-500 bg-primary-50 dark:bg-primary-900/30 dark:border-primary-500 ring-1 ring-primary-400 dark:ring-primary-500'];
+            [$ico, $baseCls, $selCls] = $cfg[$dt->name] ?? ['user','border-slate-200 bg-slate-50','border-primary-500 bg-primary-50 ring-1 ring-primary-400'];
             $isDefault = $dt->name === 'regular';
           @endphp
 
@@ -92,11 +92,11 @@
             </div>
 
             <div class="min-w-0 flex-1">
-              <div class="text-xs font-bold text-slate-800 dark:text-white leading-tight">
+              <div class="ptype-title text-xs font-bold text-slate-900 leading-tight">
                 {{ $dt->display_name }}
               </div>
-              <div class="text-[10px] mt-0.5 font-semibold
-                          {{ $dt->percentage > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-400' }}">
+              <div class="ptype-subtitle text-[10px] mt-0.5 font-semibold
+                          {{ $dt->percentage > 0 ? 'text-emerald-600' : 'text-slate-600' }}">
                 {{ $dt->percentage > 0
                     ? number_format($dt->percentage * 100, 0).'% discount'
                     : 'Standard fare' }}
@@ -104,7 +104,7 @@
             </div>
 
             <div class="ptype-check absolute top-2 right-2 w-4 h-4 rounded-full border-2 flex items-center justify-center
-                        {{ $isDefault ? 'border-primary-500 bg-primary-500' : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800' }}">
+                        {{ $isDefault ? 'border-primary-500 bg-primary-500 ptype-check-on' : 'border-slate-300 bg-white ptype-check-off' }}">
               <i data-lucide="check"
                  style="width:9px;height:9px;color:white;{{ $isDefault ? '' : 'display:none' }}"
                  class="check-icon"></i>

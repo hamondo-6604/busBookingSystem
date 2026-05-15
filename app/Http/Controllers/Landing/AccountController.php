@@ -36,7 +36,7 @@ class AccountController extends Controller
             try {
                 $data['image_url'] = Cloudinary::upload(
                     $request->file('image_url')->getRealPath(),
-                    ['folder' => 'profile_photos']
+                    ['folder' => Cloudinary::FOLDER_PROFILE_PHOTOS]
                 )->getSecurePath();
             } catch (\Exception $e) {
                 \Log::error('Cloudinary upload failed: ' . $e->getMessage());

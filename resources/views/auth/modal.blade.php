@@ -64,7 +64,7 @@ function pickType(card) {
 
     const chk  = c.querySelector('.ptype-check');
     const icon = c.querySelector('.check-icon');
-    if (chk)  { chk.classList.remove('bg-primary-500','border-primary-500','bg-amber-500','border-amber-500','bg-blue-500','border-blue-500','bg-violet-500','border-violet-500'); chk.classList.add('border-slate-300','bg-white'); }
+    if (chk)  { chk.classList.remove('bg-primary-500','border-primary-500','bg-amber-500','border-amber-500','bg-blue-500','border-blue-500','bg-violet-500','border-violet-500','ptype-check-on'); chk.classList.add('border-slate-300','bg-white','ptype-check-off'); }
     if (icon) icon.style.display = 'none';
 
     c.querySelector('input[type=radio]').checked = false;
@@ -75,7 +75,7 @@ function pickType(card) {
 
   const chk  = card.querySelector('.ptype-check');
   const icon = card.querySelector('.check-icon');
-  if (chk)  { chk.classList.remove('border-slate-300','bg-white'); chk.classList.add('border-primary-500','bg-primary-500'); }
+  if (chk)  { chk.classList.remove('border-slate-300','bg-white','ptype-check-off'); chk.classList.add('border-primary-500','bg-primary-500','ptype-check-on'); }
   if (icon) icon.style.display = '';
 
   card.querySelector('input[type=radio]').checked = true;

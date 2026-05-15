@@ -76,17 +76,6 @@
             </button>
           </form>
         @else
-          {{-- Notification bell --}}
-          @php $unread = auth()->user()->notifications()->where('is_read', false)->count(); @endphp
-          <a href="{{ route('manage.bookings') }}" class="relative p-2 rounded-xl text-slate-500 hover:bg-slate-100 transition-colors">
-            <i data-lucide="bell" style="width:18px;height:18px"></i>
-            @if($unread > 0)
-              <span class="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
-                {{ $unread > 9 ? '9+' : $unread }}
-              </span>
-            @endif
-          </a>
-
           {{-- User dropdown --}}
           <div class="relative" data-dd>
             <button onclick="document.getElementById('user-dd').classList.toggle('hidden')"
