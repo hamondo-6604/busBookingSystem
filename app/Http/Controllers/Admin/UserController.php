@@ -14,6 +14,14 @@ class UserController extends Controller
 {
     public function index(Request $request)
     {
+        // Clear new user notifications when admin visits the users page
+        if (auth()->check()) {
+            auth()->user()->appNotifications()
+                ->unread()
+                ->where('type', 'new_user')
+                ->update(['is_read' => true, 'read_at' => now()]);
+        }
+
         $query = User::with(['userType', 'discountType']);
 
         if ($request->has('role') && $request->role != '') {

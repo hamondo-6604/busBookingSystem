@@ -48,6 +48,10 @@ class StopController extends Controller
     {
         $validated = $this->validateStop($request);
 
+        if (empty($validated['name'])) {
+            $validated['name'] = $validated['code'] ?: 'Unnamed Stop';
+        }
+
         $stop = Stop::create($validated);
 
         if ($request->wantsJson() || $request->ajax()) {
@@ -102,7 +106,7 @@ class StopController extends Controller
     private function validateStop(Request $request, ?Stop $stop = null): array
     {
         $validated = $request->validate([
-            'name'        => 'required|string|max:255',
+            'name'        => ($stop ? 'required' : 'nullable') . '|string|max:255',
             'code'        => [
                 'nullable',
                 'string',

@@ -12,6 +12,14 @@ class DriverController extends Controller
 {
     public function index(Request $request)
     {
+        // Clear new driver notifications when admin visits the drivers page
+        if (auth()->check()) {
+            auth()->user()->appNotifications()
+                ->unread()
+                ->where('type', 'new_driver')
+                ->update(['is_read' => true, 'read_at' => now()]);
+        }
+
         $query = Driver::with(['user']);
 
         if ($request->has('status') && $request->status != '') {

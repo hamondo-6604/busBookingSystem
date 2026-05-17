@@ -123,7 +123,7 @@
                 </tr>
 
                 <x-modal id="edit-stop-modal-{{ $stop->id }}" title="Edit Stop" size="md">
-                    <form id="edit-stop-form-{{ $stop->id }}" action="{{ route('admin.stops.update', $stop) }}" method="POST" onsubmit="handleAjaxForm(this, 'edit-stop-modal-{{ $stop->id }}', () => setTimeout(() => window.location.reload(), 700), event)">
+                    <form id="edit-stop-form-{{ $stop->id }}" action="{{ route('admin.stops.update', $stop) }}" method="POST" onsubmit="handleAjaxForm(this, 'edit-stop-modal-{{ $stop->id }}', () => setTimeout(() => window.location.reload(), 5200), event)">
                         @csrf @method('PUT')
                         @include('admin.partials.stop-form-fields', ['stop' => $stop])
                         <x-slot:footer>
@@ -134,7 +134,7 @@
                 </x-modal>
 
                 <x-modal id="delete-stop-modal-{{ $stop->id }}" title="Delete Stop" size="sm">
-                    <form action="{{ route('admin.stops.destroy', $stop) }}" method="POST" onsubmit="handleAjaxForm(this, 'delete-stop-modal-{{ $stop->id }}', () => setTimeout(() => window.location.reload(), 700), event)">
+                    <form id="delete-stop-form-{{ $stop->id }}" action="{{ route('admin.stops.destroy', $stop) }}" method="POST" onsubmit="handleAjaxForm(this, 'delete-stop-modal-{{ $stop->id }}', () => setTimeout(() => window.location.reload(), 5200), event)">
                         @csrf @method('DELETE')
                         <div class="text-center py-4">
                             <div class="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 flex items-center justify-center text-3xl mx-auto mb-4">
@@ -144,7 +144,7 @@
                         </div>
                         <x-slot:footer>
                             <button type="button" onclick="closeAdminModal('delete-stop-modal-{{ $stop->id }}')" class="px-4 py-2 rounded-xl text-slate-600 font-semibold text-sm">Cancel</button>
-                            <button type="submit" class="px-4 py-2 rounded-xl bg-red-600 text-white font-semibold text-sm hover:bg-red-700">Yes, Delete</button>
+                            <button type="submit" form="delete-stop-form-{{ $stop->id }}" class="px-4 py-2 rounded-xl bg-red-600 text-white font-semibold text-sm hover:bg-red-700">Yes, Delete</button>
                         </x-slot:footer>
                     </form>
                 </x-modal>
@@ -158,7 +158,7 @@
 </div>
 
 <x-modal id="create-stop-modal" title="Add Bus Stop" size="md">
-    <form id="create-stop-form" action="{{ route('admin.stops.store') }}" method="POST" onsubmit="handleAjaxForm(this, 'create-stop-modal', () => setTimeout(() => window.location.reload(), 700), event)">
+    <form id="create-stop-form" action="{{ route('admin.stops.store') }}" method="POST" onsubmit="handleAjaxForm(this, 'create-stop-modal', () => setTimeout(() => window.location.reload(), 5200), event)">
         @csrf
         @include('admin.partials.stop-form-fields')
         <x-slot:footer>

@@ -692,7 +692,9 @@
       }
 
       // Toast notifications (add / edit / delete success)
-      function showAdminToast(msg, type = 'success') {
+      const ADMIN_TOAST_DURATION_MS = 5000;
+
+      function showAdminToast(msg, type = 'success', durationMs = ADMIN_TOAST_DURATION_MS) {
         const styles = {
           success: 'bg-emerald-500',
           error:   'bg-red-500',
@@ -712,7 +714,7 @@
         setTimeout(() => {
           el.classList.replace('admin-toast-enter', 'admin-toast-leave');
           setTimeout(() => el.remove(), 280);
-        }, 3200);
+        }, durationMs);
       }
 
       // Generic AJAX Form Handler
@@ -753,9 +755,8 @@
             ? await response.json()
             : { message: await response.text() };
 
-          if (!response.ok) {
-            if (response.status === 422) {
-              // Handle validation errors
+          if (!response.ok || data.success === false) {
+            if (response.status === 422 && data.errors) {
               for (const [field, errors] of Object.entries(data.errors)) {
                 const input = form.querySelector(`[name="${field}"]`);
                 if (input) {
@@ -782,7 +783,7 @@
           if (onSuccess) {
             onSuccess(data);
           } else {
-            setTimeout(() => window.location.reload(), 600);
+            setTimeout(() => window.location.reload(), ADMIN_TOAST_DURATION_MS + 200);
           }
         } catch (error) {
           console.error(error);
