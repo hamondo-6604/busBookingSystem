@@ -16,12 +16,17 @@ class BusRoute extends Model
 
     protected $table = 'routes';
 
+    public const SERVICE_NON_STOP = 'non_stop';
+    public const SERVICE_EXPRESS  = 'express';
+    public const SERVICE_REGULAR  = 'regular';
+
     protected $fillable = [
         'route_name',
         'origin_city_id',
         'destination_city_id',
-        'origin_terminal_id',       // NEW
-        'destination_terminal_id',  // NEW
+        'origin_terminal_id',
+        'destination_terminal_id',
+        'service_type',
         'distance_km',
         'estimated_duration_minutes',
         'status',
@@ -104,5 +109,20 @@ class BusRoute extends Model
     public function scopeActive($query)
     {
         return $query->where('status', 'active');
+    }
+
+    public function scopeServiceType($query, string $serviceType)
+    {
+        return $query->where('service_type', $serviceType);
+    }
+
+    public function getServiceTypeLabelAttribute(): string
+    {
+        return match ($this->service_type) {
+            self::SERVICE_NON_STOP => 'Non-Stop',
+            self::SERVICE_EXPRESS  => 'Express',
+            self::SERVICE_REGULAR  => 'Regular',
+            default                => ucfirst((string) $this->service_type),
+        };
     }
 }

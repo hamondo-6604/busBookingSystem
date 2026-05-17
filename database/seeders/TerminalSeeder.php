@@ -19,6 +19,7 @@ class TerminalSeeder extends Seeder
             ['city' => 'Iligan',        'name' => 'Iligan Bus Terminal',           'code' => 'ILI',  'address' => 'Tambacan, Iligan City',                              'lat' => 8.2280,   'lng' => 124.2452],
             ['city' => 'Tagum',         'name' => 'Tagum City Terminal',           'code' => 'TGM',  'address' => 'Tagum City, Davao del Norte',                        'lat' => 7.4475,   'lng' => 125.8080],
             ['city' => 'Koronadal',     'name' => 'Koronadal Transport Terminal',  'code' => 'KOR',  'address' => 'Koronadal City, South Cotabato',                     'lat' => 6.4975,   'lng' => 124.8472],
+            ['city' => 'Digos',         'name' => 'Digos City Bus Terminal',       'code' => 'DIG',  'address' => 'Rizal Avenue, Digos City',                           'lat' => 6.7496,   'lng' => 125.3557],
             ['city' => 'Butuan',        'name' => 'Butuan Integrated Terminal',    'code' => 'BXU',  'address' => 'Ampayon, Butuan City',                               'lat' => 8.9482,   'lng' => 125.5684],
         ];
 

@@ -20,10 +20,12 @@ class CitySeeder extends Seeder
             // Region XI
             ['name' => 'Davao City',    'province' => 'Davao del Sur',      'region' => 'Region XI'],
             ['name' => 'Tagum',         'province' => 'Davao del Norte',    'region' => 'Region XI'],
+            ['name' => 'Digos',         'province' => 'Davao del Sur',      'region' => 'Region XI'],
 
             // Region XII
             ['name' => 'General Santos','province' => 'South Cotabato',     'region' => 'Region XII'],
             ['name' => 'Koronadal',     'province' => 'South Cotabato',     'region' => 'Region XII'],
+            ['name' => 'Polomolok',     'province' => 'South Cotabato',     'region' => 'Region XII'],
             
             // Caraga
             ['name' => 'Butuan',        'province' => 'Agusan del Norte',   'region' => 'Caraga'],

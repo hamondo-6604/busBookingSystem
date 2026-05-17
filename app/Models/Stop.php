@@ -73,4 +73,26 @@ class Stop extends Model
             $q->where('route_stops.allows_boarding', true)
         );
     }
+
+    public function getTypeLabelAttribute(): string
+    {
+        return match ($this->type) {
+            'terminal'  => 'Terminal',
+            'barangay'  => 'Barangay',
+            'pickup'    => 'Pickup',
+            'dropoff'   => 'Drop-off',
+            'waypoint'  => 'Waypoint',
+            default     => ucfirst((string) $this->type),
+        };
+    }
+
+    public function getLocationLabelAttribute(): string
+    {
+        $parts = array_filter([
+            $this->city?->name,
+            $this->address,
+        ]);
+
+        return $parts ? implode(' · ', $parts) : 'No location set';
+    }
 }

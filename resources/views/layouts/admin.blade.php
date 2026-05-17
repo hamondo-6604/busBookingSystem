@@ -45,6 +45,26 @@
 
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+
+        @keyframes adminToastIn  { from { transform: translateX(110%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes adminToastOut { from { opacity: 1; } to { opacity: 0; } }
+        .admin-toast-enter { animation: adminToastIn .3s ease forwards; }
+        .admin-toast-leave { animation: adminToastOut .25s ease forwards; }
+
+        /* Native selects: custom chevron with proper right padding (all admin modals & forms) */
+        .admin-main select:not([multiple]):not([size]) {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+            background-position: right 0.875rem center;
+            background-repeat: no-repeat;
+            background-size: 0.875rem;
+            padding-right: 2.5rem !important;
+        }
+        .dark .admin-main select:not([multiple]):not([size]) {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+        }
         
         /* Sidebar Styling */
         .admin-sidebar {
@@ -225,6 +245,9 @@
             </a>
             <a href="{{ route('admin.routes.index') }}" class="nav-item {{ request()->routeIs('admin.routes.*') ? 'active' : '' }}">
                 <span class="nav-icon"><i class="fa-solid fa-route"></i></span> Routes
+            </a>
+            <a href="{{ route('admin.stops.index') }}" class="nav-item {{ request()->routeIs('admin.stops.*') ? 'active' : '' }}">
+                <span class="nav-icon"><i class="fa-solid fa-map-pin"></i></span> Bus Stops
             </a>
             <a href="{{ route('admin.payments.index') }}" class="nav-item {{ request()->routeIs('admin.payments.*') ? 'active' : '' }}">
                 <span class="nav-icon"><i class="fa-solid fa-credit-card"></i></span> Payments
@@ -668,6 +691,30 @@
         }
       }
 
+      // Toast notifications (add / edit / delete success)
+      function showAdminToast(msg, type = 'success') {
+        const styles = {
+          success: 'bg-emerald-500',
+          error:   'bg-red-500',
+          warning: 'bg-amber-500',
+          info:    'bg-blue-500',
+        };
+        const icons = {
+          success: 'fa-circle-check',
+          error:   'fa-circle-xmark',
+          warning: 'fa-triangle-exclamation',
+          info:    'fa-circle-info',
+        };
+        const el = document.createElement('div');
+        el.className = `admin-toast-enter fixed top-20 right-4 z-[9999] flex items-center gap-3 ${styles[type] || styles.success} text-white text-sm font-medium px-4 py-3 rounded-2xl shadow-xl max-w-sm`;
+        el.innerHTML = `<i class="fa-solid ${icons[type] || icons.success}"></i><span>${msg}</span>`;
+        document.body.appendChild(el);
+        setTimeout(() => {
+          el.classList.replace('admin-toast-enter', 'admin-toast-leave');
+          setTimeout(() => el.remove(), 280);
+        }, 3200);
+      }
+
       // Generic AJAX Form Handler
       async function handleAjaxForm(form, modalId, onSuccess, submitEvent = null) {
         if (submitEvent?.preventDefault) {
@@ -720,20 +767,22 @@
                 }
               }
             } else {
-              alert(data.message || 'An error occurred.');
+              showAdminToast(data.message || 'An error occurred.', 'error');
             }
-            throw new Error('Validation failed');
+            throw new Error('Request failed');
           }
 
           // Success
           if (modalId) {
             closeAdminModal(modalId);
           }
+          if (data.message) {
+            showAdminToast(data.message, 'success');
+          }
           if (onSuccess) {
             onSuccess(data);
           } else {
-            // Default reload if no success handler
-            window.location.reload();
+            setTimeout(() => window.location.reload(), 600);
           }
         } catch (error) {
           console.error(error);
@@ -745,9 +794,15 @@
         }
       }
 
-      // Initialize Theme
+      // Initialize Theme + flash messages
       document.addEventListener('DOMContentLoaded', () => {
         setAdminTheme(getAdminTheme());
+        @if(session('success'))
+          showAdminToast(@json(session('success')), 'success');
+        @endif
+        @if(session('error'))
+          showAdminToast(@json(session('error')), 'error');
+        @endif
       });
     </script>
 </body>

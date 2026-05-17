@@ -8,20 +8,29 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 
 class StopFactory extends Factory
 {
+    /** Common barangay / roadside stop names along Mindanao bus corridors. */
+    private const BARANGAY_NAMES = [
+        'Ulas', 'Mintal', 'Toril', 'Buhangin', 'Panacan', 'Calinan',
+        'Sta. Cruz', 'Sulop', 'Malalag', 'Padada', 'Hagonoy', 'Matanao', 'Bansalan',
+        'Polomolok', 'Tupi', 'Roxas', 'Maa', 'Bago Aplaya',
+    ];
+
     public function definition(): array
     {
         $city = City::inRandomOrder()->first() ?? City::factory()->create();
+        $isBarangay = fake()->boolean(70);
 
         return [
-            'name'        => fake()->randomElement(['Stop', 'Station', 'Pickup Point', 'Hub'])
-                             . ' – ' . $city->name . ' ' . fake()->streetName(),
+            'name'        => $isBarangay
+                ? fake()->randomElement(self::BARANGAY_NAMES)
+                : $city->name,
             'code'        => strtoupper(fake()->unique()->bothify('???-####')),
             'city_id'     => $city->id,
             'terminal_id' => null,
             'address'     => fake()->streetAddress(),
             'latitude'    => fake()->latitude(5.0, 20.0),
             'longitude'   => fake()->longitude(116.0, 127.0),
-            'type'        => fake()->randomElement(['pickup', 'dropoff', 'waypoint']),
+            'type'        => $isBarangay ? 'barangay' : fake()->randomElement(['pickup', 'dropoff', 'waypoint']),
             'status'      => 'active',
         ];
     }
@@ -34,12 +43,22 @@ class StopFactory extends Factory
     {
         return $this->state(function () {
             $terminal = Terminal::inRandomOrder()->first() ?? Terminal::factory()->create();
+
             return [
+                'name'        => $terminal->city?->name ?? 'Terminal',
                 'type'        => 'terminal',
                 'terminal_id' => $terminal->id,
                 'city_id'     => $terminal->city_id,
             ];
         });
+    }
+
+    public function barangay(): static
+    {
+        return $this->state(fn () => [
+            'name' => fake()->randomElement(self::BARANGAY_NAMES),
+            'type' => 'barangay',
+        ]);
     }
 
     public function pickup(): static

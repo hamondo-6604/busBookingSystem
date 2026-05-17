@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\BookingController;
 use App\Http\Controllers\Admin\TripController;
 use App\Http\Controllers\Admin\RouteController;
+use App\Http\Controllers\Admin\StopController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\DriverController;
 use App\Http\Controllers\Admin\CityController;
@@ -37,6 +38,8 @@ Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('boo
 Route::patch('/bookings/{booking}/status', [BookingController::class, 'updateStatus'])->name('bookings.update-status');
 Route::resource('trips', TripController::class);
 Route::resource('routes', RouteController::class);
+Route::put('routes/{route}/stops', [RouteController::class, 'syncStops'])->name('routes.stops.sync');
+Route::resource('stops', StopController::class)->except(['show', 'create', 'edit']);
 Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
 Route::resource('promotions', PromotionController::class);
 

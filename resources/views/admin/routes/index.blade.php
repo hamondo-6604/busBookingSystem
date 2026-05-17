@@ -21,6 +21,15 @@
             <input type="text" name="search" value="{{ request('search') }}" placeholder="Search by route name, origin, or destination..." 
                    class="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-colors">
         </div>
+        <div class="w-full sm:w-44">
+            <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Service</label>
+            <select name="service_type" class="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white text-sm">
+                <option value="">All services</option>
+                <option value="non_stop" {{ request('service_type') === 'non_stop' ? 'selected' : '' }}>Non-Stop</option>
+                <option value="express" {{ request('service_type') === 'express' ? 'selected' : '' }}>Express</option>
+                <option value="regular" {{ request('service_type') === 'regular' ? 'selected' : '' }}>Regular</option>
+            </select>
+        </div>
         <div class="w-full sm:w-48 relative" data-custom-select>
             <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Status</label>
             <input type="hidden" name="status" value="{{ request('status') }}" class="custom-select-input">
@@ -51,7 +60,7 @@
             <button type="submit" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-600 text-white text-sm font-semibold rounded-xl transition-colors">
                 Filter
             </button>
-            @if(request()->hasAny(['search', 'status']))
+            @if(request()->hasAny(['search', 'status', 'service_type']))
                 <a href="{{ route('admin.routes.index') }}" class="ml-2 text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400">Clear</a>
             @endif
         </div>
@@ -65,6 +74,8 @@
             <thead>
                 <tr class="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700 text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 font-semibold">
                     <th class="p-4">Route Name / Path</th>
+                    <th class="p-4">Service</th>
+                    <th class="p-4">Stops</th>
                     <th class="p-4">Terminals</th>
                     <th class="p-4">Distance & Duration</th>
                     <th class="p-4">Status</th>
@@ -82,6 +93,8 @@
                             <span class="truncate max-w-[120px]">{{ $route->destinationCity->name ?? 'Unknown' }}</span>
                         </div>
                     </td>
+                    <td class="p-4">@include('admin.partials.service-type-badge', ['serviceType' => $route->service_type])</td>
+                    <td class="p-4"><span class="text-sm font-bold text-slate-800 dark:text-slate-200">{{ $route->stops_count }}</span><span class="text-xs text-slate-500 block">intermediate</span></td>
                     <td class="p-4">
                         <div class="text-sm font-medium text-slate-800 dark:text-slate-200"><i class="fa-solid fa-location-dot text-emerald-500 w-4"></i> {{ $route->originTerminal->name ?? 'N/A' }}</div>
                         <div class="text-sm text-slate-500 mt-1"><i class="fa-solid fa-flag-checkered text-red-500 w-4"></i> {{ $route->destinationTerminal->name ?? 'N/A' }}</div>
@@ -128,9 +141,14 @@
                         @csrf
                         @method('PUT')
                         <div class="space-y-6">
-                            <div>
-                                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Route Name <span class="text-red-500">*</span></label>
-                                <input type="text" name="route_name" value="{{ $route->route_name }}" required class="w-full px-4 py-2 text-sm bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-800 dark:text-white outline-none focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Route Name</label>
+                                    <input type="text" name="route_name" value="{{ $route->route_name }}" placeholder="Auto if blank" class="w-full px-4 py-2 text-sm bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-primary-500 transition-colors">
+                                </div>
+                                <div>
+                                    @include('admin.partials.route-service-type-select', ['selected' => $route->service_type ?? 'regular'])
+                                </div>
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -236,7 +254,7 @@
 
                 @empty
                 <tr>
-                    <td colspan="5" class="p-8 text-center text-slate-500 dark:text-slate-400">
+                    <td colspan="7" class="p-8 text-center text-slate-500 dark:text-slate-400">
                         <div class="text-4xl mb-2"><i class="fa-solid fa-map-location-dot text-slate-300 dark:text-slate-600"></i></div>
                         <p>No routes found.</p>
                     </td>
@@ -258,9 +276,14 @@
     <form id="create-route-form" action="{{ route('admin.routes.store') }}" method="POST" onsubmit="handleAjaxForm(this, 'create-route-modal', () => window.location.reload(), event)">
         @csrf
         <div class="space-y-6">
-            <div>
-                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Route Name <span class="text-red-500">*</span></label>
-                <input type="text" name="route_name" required placeholder="e.g. Manila to Baguio Direct" class="w-full px-4 py-2 text-sm bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-800 dark:text-white outline-none focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Route Name</label>
+                    <input type="text" name="route_name" placeholder="Auto if blank" class="w-full px-4 py-2 text-sm bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-primary-500 transition-colors">
+                </div>
+                <div>
+                    @include('admin.partials.route-service-type-select', ['selected' => 'regular'])
+                </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">

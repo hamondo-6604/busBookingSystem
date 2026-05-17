@@ -20,11 +20,17 @@
         @endif
 
         <div class="space-y-6">
-            <div>
-                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Route Name <span class="text-red-500">*</span></label>
-                <input type="text" name="route_name" value="{{ old('route_name', $route->route_name) }}" required placeholder="e.g. Manila to Baguio Direct"
-                       class="w-full rounded-xl border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white focus:ring-primary-500 focus:border-primary-500">
-                @error('route_name')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Route Name</label>
+                    <input type="text" name="route_name" value="{{ old('route_name', $route->route_name) }}" placeholder="Auto-generated if blank"
+                           class="w-full rounded-xl border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white focus:ring-primary-500 focus:border-primary-500">
+                    @error('route_name')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                </div>
+                <div>
+                    @include('admin.partials.route-service-type-select', ['selected' => old('service_type', $route->service_type ?? 'regular')])
+                    @error('service_type')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">

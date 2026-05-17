@@ -12,8 +12,8 @@ return new class extends Migration
         Schema::create('stops', function (Blueprint $table) {
             $table->id();
 
-            $table->string('name');                     // "Baguio Session Road Stop"
-            $table->string('code')->unique()->nullable(); // "BAG-SR"
+            $table->string('name');                     // "Ulas", "Toril", "Digos", "Davao Ecoland"
+            $table->string('code')->unique()->nullable(); // "DVO-ULAS"
 
             $table->foreignId('city_id')
                 ->nullable()
@@ -30,7 +30,7 @@ return new class extends Migration
             $table->decimal('latitude', 10, 7)->nullable();
             $table->decimal('longitude', 10, 7)->nullable();
 
-            $table->enum('type', ['terminal', 'pickup', 'dropoff', 'waypoint'])
+            $table->enum('type', ['terminal', 'pickup', 'dropoff', 'waypoint', 'barangay'])
                 ->default('pickup');
 
             $table->enum('status', ['active', 'inactive'])->default('active');
