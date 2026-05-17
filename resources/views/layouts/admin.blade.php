@@ -29,6 +29,13 @@
 
     <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    
+    <!-- Flowbite -->
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.js"></script>
     <script>
       tailwind.config = {
         darkMode: 'class',
@@ -204,6 +211,18 @@
         .dark .nav-item.active .nav-icon { color: #38bdf8; }
         .dark .nav-badge { background: #334155; color: #cbd5e1; }
         .dark .nav-badge.gold { background: rgba(133, 77, 14, 0.4); color: #fef08a; }
+        /* Flowbite Datepicker Disabled State */
+        .datepicker-cell.disabled,
+        .datepicker-cell[disabled] {
+            color: #94a3b8 !important; /* text-slate-400 */
+            cursor: not-allowed !important;
+            background-color: transparent !important;
+            opacity: 0.4;
+        }
+        .dark .datepicker-cell.disabled,
+        .dark .datepicker-cell[disabled] {
+            color: #475569 !important; /* text-slate-600 */
+        }
     </style>
 </head>
 <body>
@@ -220,9 +239,9 @@
             <a href="{{ route('admin.dashboard') }}" class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                 <span class="nav-icon"><i class="fa-solid fa-chart-pie"></i></span> Dashboard
             </a>
-            <a href="{{ route('admin.analytics') }}" class="nav-item {{ request()->routeIs('admin.analytics') ? 'active' : '' }}">
+            {{-- <a href="{{ route('admin.analytics') }}" class="nav-item {{ request()->routeIs('admin.analytics') ? 'active' : '' }}">
                 <span class="nav-icon"><i class="fa-solid fa-chart-line"></i></span> Analytics
-            </a>
+            </a> --}}
 
             {{-- Operations --}}
             @php

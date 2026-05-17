@@ -146,20 +146,17 @@
                     </td>
                     <td class="p-4 text-right">
                         <div class="flex items-center justify-end gap-2">
-                            <form action="{{ route('admin.trash.restore', ['type' => $type, 'id' => $item->id]) }}" method="POST" onsubmit="return confirm('Are you sure you want to restore this record?')">
-                                @csrf
-                                <button type="submit" class="w-8 h-8 rounded-lg bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center transition-colors" title="Restore">
-                                    <i class="fa-solid fa-arrow-rotate-left text-sm"></i>
-                                </button>
-                            </form>
+                            <button type="button" 
+                                onclick="openConfirmModal('{{ route('admin.trash.restore', ['type' => $type, 'id' => $item->id]) }}', 'POST', 'Are you sure you want to restore this record?')"
+                                class="w-8 h-8 rounded-lg bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center transition-colors" title="Restore">
+                                <i class="fa-solid fa-arrow-rotate-left text-sm"></i>
+                            </button>
                             
-                            <form action="{{ route('admin.trash.force-delete', ['type' => $type, 'id' => $item->id]) }}" method="POST" onsubmit="return confirm('Are you sure you want to PERMANENTLY delete this record? This action cannot be undone.')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 flex items-center justify-center transition-colors" title="Delete Permanently">
-                                    <i class="fa-solid fa-trash-can text-sm"></i>
-                                </button>
-                            </form>
+                            <button type="button" 
+                                onclick="openConfirmModal('{{ route('admin.trash.force-delete', ['type' => $type, 'id' => $item->id]) }}', 'DELETE', 'Are you sure you want to PERMANENTLY delete this record? This action cannot be undone.')"
+                                class="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 flex items-center justify-center transition-colors" title="Delete Permanently">
+                                <i class="fa-solid fa-trash-can text-sm"></i>
+                            </button>
                         </div>
                     </td>
                 </tr>
@@ -181,4 +178,56 @@
     </div>
     @endif
 </div>
+
+<!-- Confirm Modal -->
+<x-modal id="confirm-modal" title="Confirm Action" size="sm">
+    <form id="confirm-form" method="POST" action="">
+        @csrf
+        <input type="hidden" name="_method" id="confirm-method" value="POST">
+        
+        <div class="p-6 text-center">
+            <div id="confirm-icon-container" class="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center mx-auto mb-4">
+                <i id="confirm-icon" class="fa-solid fa-circle-exclamation text-2xl text-slate-500 dark:text-slate-400"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-2">Are you sure?</h3>
+            <p id="confirm-message" class="text-sm text-slate-500 dark:text-slate-400 mb-6"></p>
+            
+            <div class="flex justify-center gap-3">
+                <button type="button" onclick="closeAdminModal('confirm-modal')" class="px-5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 text-sm font-semibold transition-colors">
+                    Cancel
+                </button>
+                <button type="submit" class="px-5 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold transition-colors shadow-sm shadow-primary-600/20">
+                    Yes, Proceed
+                </button>
+            </div>
+        </div>
+    </form>
+</x-modal>
+
+<script>
+    function openConfirmModal(actionUrl, method, message) {
+        document.getElementById('confirm-form').action = actionUrl;
+        document.getElementById('confirm-method').value = method;
+        document.getElementById('confirm-message').textContent = message;
+        
+        // Update styling based on method
+        const submitBtn = document.querySelector('#confirm-modal button[type="submit"]');
+        const iconContainer = document.getElementById('confirm-icon-container');
+        const icon = document.getElementById('confirm-icon');
+        
+        if (method === 'DELETE') {
+            submitBtn.className = 'px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-semibold transition-colors shadow-sm shadow-red-600/20';
+            submitBtn.textContent = 'Yes, Delete Permanently';
+            iconContainer.className = 'w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center mx-auto mb-4';
+            icon.className = 'fa-solid fa-trash-can text-2xl text-red-600 dark:text-red-500';
+        } else {
+            submitBtn.className = 'px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold transition-colors shadow-sm shadow-emerald-600/20';
+            submitBtn.textContent = 'Yes, Restore';
+            iconContainer.className = 'w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/20 flex items-center justify-center mx-auto mb-4';
+            icon.className = 'fa-solid fa-arrow-rotate-left text-2xl text-emerald-600 dark:text-emerald-500';
+        }
+        
+        openAdminModal('confirm-modal');
+    }
+</script>
 @endsection
