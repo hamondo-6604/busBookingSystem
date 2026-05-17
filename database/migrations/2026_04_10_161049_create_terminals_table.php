@@ -34,6 +34,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->string('photo')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         // Add origin_terminal_id and destination_terminal_id to routes

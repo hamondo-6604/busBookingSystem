@@ -12,20 +12,41 @@
 
 <!-- Tabs -->
 <div class="flex overflow-x-auto space-x-2 border-b border-slate-200 dark:border-slate-700 mb-6 pb-2 scrollbar-hide">
-    <a href="{{ route('admin.trash.index', ['type' => 'cities']) }}" class="px-4 py-2 text-sm font-semibold rounded-xl whitespace-nowrap transition-colors {{ $type === 'cities' ? 'bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800' }}">
+    <a href="{{ route('admin.trash.index', ['type' => 'cities']) }}" class="px-4 py-2 text-sm font-semibold rounded-xl whitespace-nowrap transition-colors flex items-center {{ $type === 'cities' ? 'bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800' }}">
         <i class="fa-solid fa-city mr-2"></i> Cities
+        @if(($counts['cities'] ?? 0) > 0)
+            <span class="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold rounded-full bg-red-500 text-white shadow-sm">{{ $counts['cities'] }}</span>
+        @endif
     </a>
-    <a href="{{ route('admin.trash.index', ['type' => 'routes']) }}" class="px-4 py-2 text-sm font-semibold rounded-xl whitespace-nowrap transition-colors {{ $type === 'routes' ? 'bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800' }}">
+    <a href="{{ route('admin.trash.index', ['type' => 'routes']) }}" class="px-4 py-2 text-sm font-semibold rounded-xl whitespace-nowrap transition-colors flex items-center {{ $type === 'routes' ? 'bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800' }}">
         <i class="fa-solid fa-route mr-2"></i> Routes
+        @if(($counts['routes'] ?? 0) > 0)
+            <span class="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold rounded-full bg-red-500 text-white shadow-sm">{{ $counts['routes'] }}</span>
+        @endif
     </a>
-    <a href="{{ route('admin.trash.index', ['type' => 'trips']) }}" class="px-4 py-2 text-sm font-semibold rounded-xl whitespace-nowrap transition-colors {{ $type === 'trips' ? 'bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800' }}">
+    <a href="{{ route('admin.trash.index', ['type' => 'trips']) }}" class="px-4 py-2 text-sm font-semibold rounded-xl whitespace-nowrap transition-colors flex items-center {{ $type === 'trips' ? 'bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800' }}">
         <i class="fa-solid fa-location-dot mr-2"></i> Trips
+        @if(($counts['trips'] ?? 0) > 0)
+            <span class="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold rounded-full bg-red-500 text-white shadow-sm">{{ $counts['trips'] }}</span>
+        @endif
     </a>
-    <a href="{{ route('admin.trash.index', ['type' => 'buses']) }}" class="px-4 py-2 text-sm font-semibold rounded-xl whitespace-nowrap transition-colors {{ $type === 'buses' ? 'bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800' }}">
+    <a href="{{ route('admin.trash.index', ['type' => 'buses']) }}" class="px-4 py-2 text-sm font-semibold rounded-xl whitespace-nowrap transition-colors flex items-center {{ $type === 'buses' ? 'bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800' }}">
         <i class="fa-solid fa-bus mr-2"></i> Buses
+        @if(($counts['buses'] ?? 0) > 0)
+            <span class="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold rounded-full bg-red-500 text-white shadow-sm">{{ $counts['buses'] }}</span>
+        @endif
     </a>
-    <a href="{{ route('admin.trash.index', ['type' => 'bus-types']) }}" class="px-4 py-2 text-sm font-semibold rounded-xl whitespace-nowrap transition-colors {{ $type === 'bus-types' ? 'bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800' }}">
+    <a href="{{ route('admin.trash.index', ['type' => 'bus-types']) }}" class="px-4 py-2 text-sm font-semibold rounded-xl whitespace-nowrap transition-colors flex items-center {{ $type === 'bus-types' ? 'bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800' }}">
         <i class="fa-solid fa-couch mr-2"></i> Bus Types
+        @if(($counts['bus-types'] ?? 0) > 0)
+            <span class="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold rounded-full bg-red-500 text-white shadow-sm">{{ $counts['bus-types'] }}</span>
+        @endif
+    </a>
+    <a href="{{ route('admin.trash.index', ['type' => 'terminals']) }}" class="px-4 py-2 text-sm font-semibold rounded-xl whitespace-nowrap transition-colors flex items-center {{ $type === 'terminals' ? 'bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800' }}">
+        <i class="fa-solid fa-building mr-2"></i> Terminals
+        @if(($counts['terminals'] ?? 0) > 0)
+            <span class="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold rounded-full bg-red-500 text-white shadow-sm">{{ $counts['terminals'] }}</span>
+        @endif
     </a>
 </div>
 
@@ -69,6 +90,9 @@
                         <th class="p-4">Bus Name</th>
                     @elseif($type === 'bus-types')
                         <th class="p-4">Type Name</th>
+                    @elseif($type === 'terminals')
+                        <th class="p-4">Terminal Name</th>
+                        <th class="p-4">Terminal Code</th>
                     @endif
                     <th class="p-4">Deleted At</th>
                     <th class="p-4 text-right">Actions</th>
@@ -108,6 +132,13 @@
                     @elseif($type === 'bus-types')
                         <td class="p-4">
                             <div class="font-bold text-slate-800 dark:text-slate-200">{{ $item->type_name }}</div>
+                        </td>
+                    @elseif($type === 'terminals')
+                        <td class="p-4">
+                            <div class="font-bold text-slate-800 dark:text-slate-200">{{ $item->name }}</div>
+                        </td>
+                        <td class="p-4 text-sm text-slate-600 dark:text-slate-400">
+                            {{ $item->code }}
                         </td>
                     @endif
                     <td class="p-4 text-sm text-slate-500 dark:text-slate-400">
