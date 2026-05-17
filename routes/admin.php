@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\BookingController;
 use App\Http\Controllers\Admin\TripController;
 use App\Http\Controllers\Admin\RouteController;
 use App\Http\Controllers\Admin\StopController;
+use App\Http\Controllers\Admin\TerminalController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\DriverController;
 use App\Http\Controllers\Admin\CityController;
@@ -40,6 +41,7 @@ Route::resource('trips', TripController::class);
 Route::resource('routes', RouteController::class);
 Route::put('routes/{route}/stops', [RouteController::class, 'syncStops'])->name('routes.stops.sync');
 Route::resource('stops', StopController::class)->except(['show', 'create', 'edit']);
+Route::resource('terminals', TerminalController::class)->except(['show', 'create', 'edit']);
 Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
 Route::resource('promotions', PromotionController::class);
 

@@ -249,6 +249,9 @@
             <a href="{{ route('admin.stops.index') }}" class="nav-item {{ request()->routeIs('admin.stops.*') ? 'active' : '' }}">
                 <span class="nav-icon"><i class="fa-solid fa-map-pin"></i></span> Bus Stops
             </a>
+            <a href="{{ route('admin.terminals.index') }}" class="nav-item {{ request()->routeIs('admin.terminals.*') ? 'active' : '' }}">
+                <span class="nav-icon"><i class="fa-solid fa-building"></i></span> Terminals
+            </a>
             <a href="{{ route('admin.payments.index') }}" class="nav-item {{ request()->routeIs('admin.payments.*') ? 'active' : '' }}">
                 <span class="nav-icon"><i class="fa-solid fa-credit-card"></i></span> Payments
             </a>
