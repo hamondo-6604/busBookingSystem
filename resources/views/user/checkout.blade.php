@@ -181,40 +181,92 @@
             <div class="w-full lg:w-[400px] shrink-0">
                 <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden sticky top-24">
                     
+                    @php
+                        $rb = $booking->returnBooking;
+                        $isRT = $booking->trip_type === 'round_trip' && $rb;
+                        $combinedBase     = (float) $booking->base_fare + ($isRT ? (float) $rb->base_fare : 0);
+                        $combinedDiscount = (float) $booking->discount_amount + ($isRT ? (float) $rb->discount_amount : 0);
+                        $combinedTotal    = $combinedBase - $combinedDiscount;
+                        $combinedSeats    = $booking->bookingSeats->count() + ($isRT ? $rb->bookingSeats->count() : 0);
+                    @endphp
+
                     {{-- Trip Summary --}}
                     <div class="p-6 bg-slate-50 border-b border-slate-200">
-                        <h3 class="text-sm font-bold text-slate-800 mb-3 uppercase tracking-wider">Order Summary</h3>
-                        <div class="flex justify-between text-sm mb-2">
-                            <span class="text-slate-600">Route</span>
-                            <span class="font-semibold text-slate-900">{{ $booking->trip->route?->originCity?->name }} → {{ $booking->trip->route?->destinationCity?->name }}</span>
-                        </div>
-                        <div class="flex justify-between text-sm mb-2">
-                            <span class="text-slate-600">Date</span>
-                            <span class="font-semibold text-slate-900">{{ \Carbon\Carbon::parse($booking->trip->trip_date)->format('M j, Y') }}</span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-slate-600">Passengers</span>
-                            <span class="font-semibold text-slate-900">{{ $booking->bookingSeats->count() }}</span>
-                        </div>
+                        <h3 class="text-sm font-bold text-slate-800 mb-3 uppercase tracking-wider">
+                            Order Summary
+                            @if($isRT)
+                                <span class="ml-2 text-[10px] font-bold uppercase bg-primary-100 text-primary-700 px-2 py-0.5 rounded-full">Round-trip</span>
+                            @endif
+                        </h3>
+
+                        @if($isRT)
+                            <div class="space-y-3">
+                                <div>
+                                    <div class="text-[10px] font-bold uppercase text-slate-400 mb-1">Outbound</div>
+                                    <div class="text-sm font-semibold text-slate-800">
+                                        {{ $booking->trip->route?->originCity?->name }} → {{ $booking->trip->route?->destinationCity?->name }}
+                                    </div>
+                                    <div class="text-xs text-slate-500">
+                                        {{ \Carbon\Carbon::parse($booking->trip->trip_date)->format('M j, Y') }}
+                                        · {{ $booking->bookingSeats->count() }} seat(s)
+                                    </div>
+                                </div>
+                                <div class="border-t border-slate-200/70"></div>
+                                <div>
+                                    <div class="text-[10px] font-bold uppercase text-slate-400 mb-1">Return</div>
+                                    <div class="text-sm font-semibold text-slate-800">
+                                        {{ $rb->trip->route?->originCity?->name }} → {{ $rb->trip->route?->destinationCity?->name }}
+                                    </div>
+                                    <div class="text-xs text-slate-500">
+                                        {{ \Carbon\Carbon::parse($rb->trip->trip_date)->format('M j, Y') }}
+                                        · {{ $rb->bookingSeats->count() }} seat(s)
+                                    </div>
+                                </div>
+                            </div>
+                        @else
+                            <div class="flex justify-between text-sm mb-2">
+                                <span class="text-slate-600">Route</span>
+                                <span class="font-semibold text-slate-900">{{ $booking->trip->route?->originCity?->name }} → {{ $booking->trip->route?->destinationCity?->name }}</span>
+                            </div>
+                            <div class="flex justify-between text-sm mb-2">
+                                <span class="text-slate-600">Date</span>
+                                <span class="font-semibold text-slate-900">{{ \Carbon\Carbon::parse($booking->trip->trip_date)->format('M j, Y') }}</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-slate-600">Passengers</span>
+                                <span class="font-semibold text-slate-900">{{ $booking->bookingSeats->count() }}</span>
+                            </div>
+                        @endif
                     </div>
 
                     {{-- Fare Breakdown --}}
                     <div class="p-6">
                         <div class="space-y-3 mb-6 pb-6 border-b border-slate-200 border-dashed">
-                            <div class="flex justify-between text-sm text-slate-600">
-                                <span>Base Fare</span>
-                                <span class="font-medium">₱{{ number_format($booking->base_fare, 2) }}</span>
-                            </div>
+                            @if($isRT)
+                                <div class="flex justify-between text-sm text-slate-600">
+                                    <span>Outbound base fare</span>
+                                    <span class="font-medium">₱{{ number_format($booking->base_fare, 2) }}</span>
+                                </div>
+                                <div class="flex justify-between text-sm text-slate-600">
+                                    <span>Return base fare</span>
+                                    <span class="font-medium">₱{{ number_format($rb->base_fare, 2) }}</span>
+                                </div>
+                            @else
+                                <div class="flex justify-between text-sm text-slate-600">
+                                    <span>Base Fare</span>
+                                    <span class="font-medium">₱{{ number_format($booking->base_fare, 2) }}</span>
+                                </div>
+                            @endif
                             <div class="flex justify-between text-sm text-emerald-600">
                                 <span>Total Discounts</span>
-                                <span class="font-medium">- ₱{{ number_format($booking->discount_amount, 2) }}</span>
+                                <span class="font-medium">- ₱{{ number_format($combinedDiscount, 2) }}</span>
                             </div>
                         </div>
 
                         <div class="flex justify-between items-end mb-6">
                             <div class="text-sm font-bold text-slate-800">Total Payable</div>
                             <div class="text-3xl font-extrabold text-primary-600">
-                                ₱{{ number_format($booking->base_fare - $booking->discount_amount, 2) }}
+                                ₱{{ number_format($combinedTotal, 2) }}
                             </div>
                         </div>
 

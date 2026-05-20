@@ -164,6 +164,22 @@
     {{-- Horizontal Search Form --}}
     <form action="{{ route('landing.ticket_booking.search') }}" method="POST" id="hero-search-form" class="p-4">
       @csrf
+
+      {{-- Trip Type Toggle --}}
+      <input type="hidden" name="trip_type" id="hero-trip-type" value="one_way">
+      <div class="flex items-center gap-2 mb-3 ml-1">
+        <button type="button" id="hero-trip-type-oneway"
+                onclick="setHeroTripType('one_way')"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors bg-primary-600 text-white shadow-sm">
+          <i data-lucide="arrow-right" style="width:13px;height:13px"></i> One-way
+        </button>
+        <button type="button" id="hero-trip-type-roundtrip"
+                onclick="setHeroTripType('round_trip')"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors bg-slate-100 text-slate-600 hover:bg-slate-200">
+          <i data-lucide="arrow-left-right" style="width:13px;height:13px"></i> Round-trip
+        </button>
+      </div>
+
       <div class="flex flex-col md:flex-row items-start gap-3">
         <div class="flex-1 w-full">
           <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Origin</label>
@@ -225,7 +241,19 @@
           </div>
           <p id="hero-date-error" class="hidden mt-1.5 ml-1 text-xs font-semibold text-red-600 min-h-[16px] leading-tight"></p>
         </div>
-        
+
+        {{-- Return Date (shown only for round-trip) --}}
+        <div class="flex-1 w-full hidden" id="hero-return-date-wrapper">
+          <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Return Date</label>
+          <div class="relative">
+            <i data-lucide="calendar" style="width:16px;height:16px;position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#94a3b8"></i>
+            <input type="date" name="return_date" min="{{ today()->toDateString() }}"
+                   id="hero-return-date"
+                   class="w-full pl-10 pr-4 py-3.5 text-sm font-semibold border-2 border-slate-200 rounded-xl bg-white text-slate-800 outline-none focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 hover:border-slate-300 transition-colors shadow-sm">
+          </div>
+          <p id="hero-return-date-error" class="hidden mt-1.5 ml-1 text-xs font-semibold text-red-600 min-h-[16px] leading-tight"></p>
+        </div>
+
         <div class="w-full md:w-auto md:min-w-[140px] pt-[26px] md:pt-[26px]">
           <button type="submit" class="w-full py-3.5 px-6 bg-primary-600 hover:bg-primary-700 text-white text-base font-bold rounded-xl transition-all shadow-[0_4px_14px_0_rgba(234,88,12,0.39)] hover:shadow-[0_6px_20px_rgba(234,88,12,0.23)] flex items-center justify-center gap-2">
           Search
@@ -1208,6 +1236,43 @@
     // ensure lucide icons applied inside custom dropdown buttons
     try { lucide?.createIcons?.(); } catch (e) {}
     prefillHeroSearchFromUrl();
+  });
+
+  // ── Trip-type toggle (one-way / round-trip) ─────────────────────
+  function setHeroTripType(type) {
+    const input = document.getElementById('hero-trip-type');
+    if (input) input.value = type;
+
+    const oneway = document.getElementById('hero-trip-type-oneway');
+    const round  = document.getElementById('hero-trip-type-roundtrip');
+    const wrap   = document.getElementById('hero-return-date-wrapper');
+    const ret    = document.getElementById('hero-return-date');
+    if (!oneway || !round || !wrap || !ret) return;
+
+    const activeCls = ['bg-primary-600', 'text-white', 'shadow-sm'];
+    const idleCls   = ['bg-slate-100', 'text-slate-600', 'hover:bg-slate-200'];
+
+    if (type === 'round_trip') {
+      round.classList.add(...activeCls);   round.classList.remove(...idleCls);
+      oneway.classList.add(...idleCls);    oneway.classList.remove(...activeCls);
+      wrap.classList.remove('hidden');
+      ret.required = true;
+    } else {
+      oneway.classList.add(...activeCls);  oneway.classList.remove(...idleCls);
+      round.classList.add(...idleCls);     round.classList.remove(...activeCls);
+      wrap.classList.add('hidden');
+      ret.required = false;
+      ret.value = '';
+    }
+  }
+
+  // Keep return-date min in sync with departure date
+  document.getElementById('hero-date')?.addEventListener('change', (e) => {
+    const ret = document.getElementById('hero-return-date');
+    if (ret) {
+      ret.min = e.target.value || '{{ today()->toDateString() }}';
+      if (ret.value && ret.value < ret.min) ret.value = ret.min;
+    }
   });
 
   document.getElementById('hero-search-form')?.addEventListener('submit', (e) => {

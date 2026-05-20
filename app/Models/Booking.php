@@ -17,6 +17,9 @@ class Booking extends Model
     protected $fillable = [
         'user_id',
         'trip_id',
+        'trip_type',         // 'one_way' or 'round_trip'
+        'return_booking_id', // outbound booking points at its return leg
+        'is_return_leg',     // true on the return-leg row of a round-trip pair
         'seat_id',          // primary seat (kept for BC) — full list is in booking_seats
         'promotion_id',
         'seat_number',
@@ -35,6 +38,7 @@ class Booking extends Model
         'base_fare'       => 'decimal:2',
         'discount_amount' => 'decimal:2',
         'amount_paid'     => 'decimal:2',
+        'is_return_leg'   => 'boolean',
     ];
 
     // ------------------------------------------------------------------
@@ -98,6 +102,23 @@ class Booking extends Model
     public function bookingSeats(): HasMany
     {
         return $this->hasMany(BookingSeat::class);
+    }
+
+    /**
+     * The return-leg booking (set only on outbound bookings of round-trips).
+     */
+    public function returnBooking(): BelongsTo
+    {
+        return $this->belongsTo(Booking::class, 'return_booking_id');
+    }
+
+    /**
+     * The outbound booking that points at this booking as its return leg.
+     * Useful when you only have the return-leg booking in hand.
+     */
+    public function outboundBooking(): HasOne
+    {
+        return $this->hasOne(Booking::class, 'return_booking_id');
     }
 
     // ------------------------------------------------------------------
@@ -184,5 +205,53 @@ class Booking extends Model
     public function scopePaid($query)
     {
         return $query->where('payment_status', 'paid');
+    }
+
+    // ------------------------------------------------------------------
+    // ROUND-TRIP HELPERS
+    // ------------------------------------------------------------------
+
+    /**
+     * Whether this booking is part of a round-trip pair (either leg).
+     */
+    public function getIsRoundTripAttribute(): bool
+    {
+        return $this->trip_type === 'round_trip';
+    }
+
+    /**
+     * Whether this booking is the outbound leg of a round-trip pair.
+     */
+    public function isOutboundLeg(): bool
+    {
+        return $this->trip_type === 'round_trip' && ! $this->is_return_leg;
+    }
+
+    /**
+     * Resolve the outbound ("primary") booking row for a round-trip pair.
+     * Returns $this for one-way bookings or the outbound leg of a round-trip.
+     */
+    public function primaryLeg(): self
+    {
+        if ($this->is_return_leg) {
+            return $this->outboundBooking()->first() ?? $this;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Convenience: get the partner leg (return for outbound, outbound for return).
+     * Returns null for one-way bookings.
+     */
+    public function partnerLeg(): ?self
+    {
+        if (! $this->is_round_trip) {
+            return null;
+        }
+
+        return $this->is_return_leg
+            ? $this->outboundBooking()->first()
+            : $this->returnBooking;
     }
 }

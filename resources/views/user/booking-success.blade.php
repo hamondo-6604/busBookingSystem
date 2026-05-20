@@ -77,72 +77,91 @@
         <p class="text-slate-500 mt-2">Your booking has been confirmed and your digital ticket is ready.</p>
     </div>
 
-    <div class="ticket-container">
-        {{-- Header --}}
-        <div class="ticket-header">
-            <div class="text-xs font-bold text-primary-600 uppercase tracking-widest mb-1">Boarding Pass</div>
-            <h2 class="text-2xl font-black text-slate-900 tracking-tight">{{ $booking->booking_reference }}</h2>
-            <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-full mt-3">
-                <i data-lucide="badge-check" style="width:14px;height:14px"></i>
-                Confirmed & Paid
-            </div>
-        </div>
+    @php
+        $rb = $booking->returnBooking;
+        $isRT = $booking->trip_type === 'round_trip' && $rb;
+        $legs = collect([
+            ['label' => $isRT ? 'Outbound' : null, 'booking' => $booking],
+        ]);
+        if ($isRT) {
+            $legs->push(['label' => 'Return', 'booking' => $rb]);
+        }
+    @endphp
 
-        {{-- Body --}}
-        <div class="ticket-body">
-            
-            {{-- Route Info --}}
-            <div class="flex items-center justify-between mb-8">
-                <div class="text-center w-1/3">
-                    <div class="text-3xl font-extrabold text-slate-900">{{ strtoupper(substr($booking->trip->route?->originCity?->name, 0, 3)) }}</div>
-                    <div class="text-xs text-slate-500 mt-1 truncate">{{ $booking->trip->route?->originCity?->name }}</div>
+    @foreach($legs as $leg)
+        @php
+            $lb = $leg['booking'];
+            $legLabel = $leg['label'];
+        @endphp
+        <div class="ticket-container {{ !$loop->first ? 'mt-8' : '' }}">
+            {{-- Header --}}
+            <div class="ticket-header">
+                <div class="text-xs font-bold text-primary-600 uppercase tracking-widest mb-1">
+                    Boarding Pass{{ $legLabel ? ' · ' . $legLabel : '' }}
                 </div>
-                
-                <div class="flex-1 px-4 relative">
-                    <div class="h-px bg-slate-200 w-full absolute top-1/2 left-0 -translate-y-1/2"></div>
-                    <div class="w-8 h-8 bg-white border border-slate-200 rounded-full flex items-center justify-center mx-auto relative z-10 text-primary-500 shadow-sm">
-                        <i data-lucide="bus" style="width:14px;height:14px"></i>
+                <h2 class="text-2xl font-black text-slate-900 tracking-tight">{{ $lb->booking_reference }}</h2>
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-full mt-3">
+                    <i data-lucide="badge-check" style="width:14px;height:14px"></i>
+                    Confirmed & Paid
+                </div>
+            </div>
+
+            {{-- Body --}}
+            <div class="ticket-body">
+
+                {{-- Route Info --}}
+                <div class="flex items-center justify-between mb-8">
+                    <div class="text-center w-1/3">
+                        <div class="text-3xl font-extrabold text-slate-900">{{ strtoupper(substr($lb->trip->route?->originCity?->name, 0, 3)) }}</div>
+                        <div class="text-xs text-slate-500 mt-1 truncate">{{ $lb->trip->route?->originCity?->name }}</div>
+                    </div>
+
+                    <div class="flex-1 px-4 relative">
+                        <div class="h-px bg-slate-200 w-full absolute top-1/2 left-0 -translate-y-1/2"></div>
+                        <div class="w-8 h-8 bg-white border border-slate-200 rounded-full flex items-center justify-center mx-auto relative z-10 text-primary-500 shadow-sm">
+                            <i data-lucide="bus" style="width:14px;height:14px"></i>
+                        </div>
+                    </div>
+
+                    <div class="text-center w-1/3">
+                        <div class="text-3xl font-extrabold text-slate-900">{{ strtoupper(substr($lb->trip->route?->destinationCity?->name, 0, 3)) }}</div>
+                        <div class="text-xs text-slate-500 mt-1 truncate">{{ $lb->trip->route?->destinationCity?->name }}</div>
                     </div>
                 </div>
 
-                <div class="text-center w-1/3">
-                    <div class="text-3xl font-extrabold text-slate-900">{{ strtoupper(substr($booking->trip->route?->destinationCity?->name, 0, 3)) }}</div>
-                    <div class="text-xs text-slate-500 mt-1 truncate">{{ $booking->trip->route?->destinationCity?->name }}</div>
-                </div>
-            </div>
-
-            {{-- Details Grid --}}
-            <div class="grid grid-cols-2 gap-y-6 gap-x-4 mb-8 p-6 bg-slate-50 rounded-2xl border border-slate-100">
-                <div>
-                    <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Departure Date</div>
-                    <div class="font-bold text-slate-900">{{ \Carbon\Carbon::parse($booking->trip->trip_date)->format('M j, Y') }}</div>
-                </div>
-                <div>
-                    <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Time</div>
-                    <div class="font-bold text-slate-900">{{ \Carbon\Carbon::parse($booking->trip->departure_time)->format('h:i A') }}</div>
-                </div>
-                <div>
-                    <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Bus Class</div>
-                    <div class="font-bold text-slate-900">{{ $booking->trip->bus?->type?->type_name ?? 'Economy' }}</div>
-                </div>
-                <div>
-                    <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Seat(s)</div>
-                    <div class="font-bold text-primary-600 text-lg leading-none">
-                        {{ implode(', ', $booking->bookingSeats->pluck('seat_number')->toArray()) }}
+                {{-- Details Grid --}}
+                <div class="grid grid-cols-2 gap-y-6 gap-x-4 mb-8 p-6 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div>
+                        <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Departure Date</div>
+                        <div class="font-bold text-slate-900">{{ \Carbon\Carbon::parse($lb->trip->trip_date)->format('M j, Y') }}</div>
+                    </div>
+                    <div>
+                        <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Time</div>
+                        <div class="font-bold text-slate-900">{{ \Carbon\Carbon::parse($lb->trip->departure_time)->format('h:i A') }}</div>
+                    </div>
+                    <div>
+                        <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Bus Class</div>
+                        <div class="font-bold text-slate-900">{{ $lb->trip->bus?->type?->type_name ?? 'Economy' }}</div>
+                    </div>
+                    <div>
+                        <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Seat(s)</div>
+                        <div class="font-bold text-primary-600 text-lg leading-none">
+                            {{ implode(', ', $lb->bookingSeats->pluck('seat_number')->toArray()) }}
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            {{-- QR Code --}}
-            <div class="text-center">
-                <div class="qr-placeholder mb-3">
-                    <i data-lucide="qr-code" style="width:64px;height:64px;color:#94a3b8;opacity:0.5"></i>
+                {{-- QR Code --}}
+                <div class="text-center">
+                    <div class="qr-placeholder mb-3">
+                        <i data-lucide="qr-code" style="width:64px;height:64px;color:#94a3b8;opacity:0.5"></i>
+                    </div>
+                    <p class="text-xs text-slate-500">Scan at boarding</p>
                 </div>
-                <p class="text-xs text-slate-500">Scan at boarding</p>
+
             </div>
-            
         </div>
-    </div>
+    @endforeach
 
     {{-- Actions --}}
     <div class="max-w-[600px] mx-auto mt-8 flex flex-wrap gap-4 justify-center print:hidden">

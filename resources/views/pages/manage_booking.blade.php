@@ -141,6 +141,11 @@
             $dest    = $booking->trip?->route?->destinationCity?->name ?? '—';
             $dep     = $booking->trip?->departure_time;
             $isPast  = $dep?->isPast();
+            $rb      = $booking->returnBooking;
+            $isRT    = $booking->trip_type === 'round_trip' && $rb;
+            $combinedAmount = (float) $booking->amount_paid + ($isRT ? (float) $rb->amount_paid : 0);
+            $combinedDiscount = (float) $booking->discount_amount + ($isRT ? (float) $rb->discount_amount : 0);
+            $totalSeatCount = $booking->seat_count + ($isRT ? $rb->seat_count : 0);
             $statusMap = [
               'confirmed' => ['bg-blue-100 text-blue-700',   'clock',        'Confirmed'],
               'pending'   => ['bg-amber-100 text-amber-700', 'hourglass',    'Pending'],
@@ -156,12 +161,18 @@
 
             {{-- Card header --}}
             <div class="flex items-center justify-between px-5 py-3 border-b border-slate-100 bg-slate-50">
-              <div class="flex items-center gap-2">
+              <div class="flex items-center gap-2 flex-wrap">
                 <span class="text-xs font-mono font-bold text-slate-600">{{ $booking->booking_reference }}</span>
                 <span class="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full {{ $sbg }}">
                   <i data-lucide="{{ $sicon }}" style="width:10px;height:10px"></i>
                   {{ $slabel }}
                 </span>
+                @if($isRT)
+                  <span class="inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full bg-primary-100 text-primary-700">
+                    <i data-lucide="arrow-left-right" style="width:10px;height:10px"></i>
+                    Round-trip
+                  </span>
+                @endif
               </div>
               <span class="text-xs text-slate-400">{{ $booking->created_at->format('M j, Y') }}</span>
             </div>
@@ -169,35 +180,69 @@
             {{-- Card body --}}
             <div class="p-5 flex flex-wrap gap-5 items-start">
 
-              {{-- Route --}}
-              <div class="flex items-center gap-3 flex-1 min-w-[200px]">
-                <div class="w-9 h-9 bg-primary-50 rounded-xl flex items-center justify-center shrink-0">
-                  <i data-lucide="bus" style="width:16px;height:16px;color:#ea580c"></i>
-                </div>
-                <div class="min-w-0">
-                  <div class="text-sm font-bold text-slate-900 truncate">{{ $origin }} → {{ $dest }}</div>
-                  <div class="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
-                    <i data-lucide="calendar" style="width:10px;height:10px"></i>
-                    {{ $dep?->format('D, M j Y · g:i A') ?? '—' }}
+              {{-- Route(s) --}}
+              <div class="flex-1 min-w-[200px] space-y-3">
+                {{-- Outbound --}}
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 bg-primary-50 rounded-xl flex items-center justify-center shrink-0">
+                    <i data-lucide="bus" style="width:16px;height:16px;color:#ea580c"></i>
                   </div>
-                  <div class="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
-                    <i data-lucide="armchair" style="width:10px;height:10px"></i>
-                    Seat {{ $booking->seat_list }}
-                    @if($booking->seat_count > 1)
-                      <span class="text-primary-600 font-semibold">({{ $booking->seat_count }} seats)</span>
+                  <div class="min-w-0">
+                    @if($isRT)
+                      <div class="text-[10px] font-bold uppercase tracking-wider text-primary-600 mb-0.5">Outbound</div>
                     @endif
+                    <div class="text-sm font-bold text-slate-900 truncate">{{ $origin }} → {{ $dest }}</div>
+                    <div class="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
+                      <i data-lucide="calendar" style="width:10px;height:10px"></i>
+                      {{ $dep?->format('D, M j Y · g:i A') ?? '—' }}
+                    </div>
+                    <div class="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
+                      <i data-lucide="armchair" style="width:10px;height:10px"></i>
+                      Seat {{ $booking->seat_list }}
+                      @if($booking->seat_count > 1)
+                        <span class="text-primary-600 font-semibold">({{ $booking->seat_count }} seats)</span>
+                      @endif
+                    </div>
                   </div>
                 </div>
+                {{-- Return (if round-trip) --}}
+                @if($isRT)
+                  @php
+                    $rOrigin = $rb->trip?->route?->originCity?->name ?? '—';
+                    $rDest   = $rb->trip?->route?->destinationCity?->name ?? '—';
+                    $rDep    = $rb->trip?->departure_time;
+                  @endphp
+                  <div class="flex items-center gap-3 pt-3 border-t border-dashed border-slate-200">
+                    <div class="w-9 h-9 bg-emerald-50 rounded-xl flex items-center justify-center shrink-0">
+                      <i data-lucide="corner-down-left" style="width:16px;height:16px;color:#059669"></i>
+                    </div>
+                    <div class="min-w-0">
+                      <div class="text-[10px] font-bold uppercase tracking-wider text-emerald-600 mb-0.5">Return</div>
+                      <div class="text-sm font-bold text-slate-900 truncate">{{ $rOrigin }} → {{ $rDest }}</div>
+                      <div class="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
+                        <i data-lucide="calendar" style="width:10px;height:10px"></i>
+                        {{ $rDep?->format('D, M j Y · g:i A') ?? '—' }}
+                      </div>
+                      <div class="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
+                        <i data-lucide="armchair" style="width:10px;height:10px"></i>
+                        Seat {{ $rb->seat_list }}
+                        @if($rb->seat_count > 1)
+                          <span class="text-emerald-600 font-semibold">({{ $rb->seat_count }} seats)</span>
+                        @endif
+                      </div>
+                    </div>
+                  </div>
+                @endif
               </div>
 
               {{-- Payment --}}
               <div class="text-right shrink-0">
-                <div class="text-xs text-slate-400">Amount Paid</div>
-                <div class="text-xl font-extrabold text-slate-900">{{ $booking->formatted_amount_paid }}</div>
-                @if($booking->discount_amount > 0)
+                <div class="text-xs text-slate-400">{{ $isRT ? 'Total Paid (both legs)' : 'Amount Paid' }}</div>
+                <div class="text-xl font-extrabold text-slate-900">₱{{ number_format($combinedAmount, 2) }}</div>
+                @if($combinedDiscount > 0)
                   <div class="text-xs text-emerald-600 font-semibold flex items-center gap-1 justify-end">
                     <i data-lucide="badge-percent" style="width:10px;height:10px"></i>
-                    Saved ₱{{ number_format($booking->discount_amount, 2) }}
+                    Saved ₱{{ number_format($combinedDiscount, 2) }}
                   </div>
                 @endif
                 <span class="text-xs font-semibold {{ $booking->payment_status === 'paid' ? 'text-emerald-600' : 'text-amber-600' }}">

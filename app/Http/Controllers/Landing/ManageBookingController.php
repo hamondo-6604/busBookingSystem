@@ -26,7 +26,14 @@ class ManageBookingController extends Controller
             'bookingSeats',
             'payment',
             'promotion',
-        ])->where('user_id', $user->id);
+            'returnBooking.trip.route.originCity',
+            'returnBooking.trip.route.destinationCity',
+            'returnBooking.trip.bus.type',
+            'returnBooking.bookingSeats',
+        ])
+            ->where('user_id', $user->id)
+            // Hide the return-leg row from the list — it is shown nested under its outbound row.
+            ->where('is_return_leg', false);
 
         if ($status !== 'all') {
             $query->where('status', $status);
@@ -94,17 +101,35 @@ class ManageBookingController extends Controller
             return back()->with('error', 'This booking cannot be cancelled.');
         }
 
-        $booking->update([
-            'status'              => 'cancelled',
-            'cancelled_at'        => now(),
-            'cancellation_reason' => $request->input('reason', 'Customer request'),
-        ]);
+        $reason = $request->input('reason', 'Customer request');
 
-        $booking->seat?->update(['status' => 'available']);
-        $booking->bookingSeats()->update(['status' => 'cancelled']);
-        $booking->trip?->increment('available_seats', $booking->seat_count);
+        // Cancel both legs of a round-trip pair together.
+        $legs = collect([$booking])
+            ->when($booking->returnBooking, fn ($c) => $c->push($booking->returnBooking))
+            // If the user somehow lands here on the return leg, also pull in the outbound.
+            ->when($booking->is_return_leg, function ($c) use ($booking) {
+                $outbound = $booking->outboundBooking()->first();
+                return $outbound ? $c->push($outbound) : $c;
+            })
+            ->unique('id');
 
-        return back()->with('success', 'Booking '.$booking->booking_reference.' has been cancelled.');
+        foreach ($legs as $leg) {
+            $leg->update([
+                'status'              => 'cancelled',
+                'cancelled_at'        => now(),
+                'cancellation_reason' => $reason,
+            ]);
+
+            $leg->seat?->update(['status' => 'available']);
+            $leg->bookingSeats()->update(['status' => 'cancelled']);
+            $leg->trip?->increment('available_seats', $leg->seat_count);
+        }
+
+        $msg = $booking->is_round_trip
+            ? 'Round-trip booking '.$booking->booking_reference.' (both legs) has been cancelled.'
+            : 'Booking '.$booking->booking_reference.' has been cancelled.';
+
+        return back()->with('success', $msg);
     }
 
     public function markNotificationsRead()
@@ -139,6 +164,13 @@ class ManageBookingController extends Controller
     public function destroy(Booking $booking)
     {
         abort_if($booking->user_id !== Auth::id(), 403);
+
+        // Soft-delete both legs of a round-trip together.
+        if ($booking->returnBooking) {
+            $booking->returnBooking->delete();
+        } elseif ($booking->is_return_leg) {
+            $booking->outboundBooking()->first()?->delete();
+        }
 
         $booking->delete();
 

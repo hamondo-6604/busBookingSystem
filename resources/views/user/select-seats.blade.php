@@ -208,8 +208,51 @@
     </div>
 </div>
 
+@php
+    $rtCtx = $roundTripContext ?? ['trip_type' => 'one_way', 'leg' => 'outbound', 'return_date' => null, 'outbound_booking_id' => null];
+    $isRoundTrip = ($rtCtx['trip_type'] ?? 'one_way') === 'round_trip';
+    $isReturnLeg = $isRoundTrip && ($rtCtx['leg'] ?? 'outbound') === 'return';
+@endphp
+
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-    
+
+    @if($isRoundTrip)
+        {{-- Round-trip progress indicator --}}
+        <div class="mb-6 p-4 bg-white border border-slate-200 rounded-2xl shadow-sm">
+            <div class="flex items-center gap-3 text-xs font-semibold">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full {{ $isReturnLeg ? 'bg-emerald-500 text-white' : 'bg-primary-600 text-white' }}">
+                    @if($isReturnLeg)
+                        <i data-lucide="check" style="width:11px;height:11px"></i> Outbound seats
+                    @else
+                        <span class="font-extrabold">1</span> Outbound seats
+                    @endif
+                </span>
+                <div class="flex-1 max-w-[80px] h-px bg-slate-200"></div>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full {{ $isReturnLeg ? 'bg-primary-600 text-white' : 'bg-slate-100 text-slate-500' }}">
+                    <span class="font-extrabold">2</span> Return seats
+                </span>
+                <div class="flex-1 max-w-[80px] h-px bg-slate-200"></div>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-500">
+                    <span class="font-extrabold">3</span> Passenger details
+                </span>
+                <div class="flex-1 max-w-[80px] h-px bg-slate-200"></div>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-500">
+                    <span class="font-extrabold">4</span> Payment
+                </span>
+            </div>
+            @if($isReturnLeg && !empty($outboundBooking))
+                <div class="mt-3 pt-3 border-t border-slate-100 text-xs text-slate-600">
+                    <span class="font-bold text-emerald-600">✓</span>
+                    Outbound:
+                    {{ $outboundBooking->trip?->route?->originCity?->name }} →
+                    {{ $outboundBooking->trip?->route?->destinationCity?->name }}
+                    · Seats {{ $outboundBooking->bookingSeats->pluck('seat_number')->join(', ') }}
+                    · Please select <strong>{{ $outboundBooking->bookingSeats->count() }} seat(s)</strong> for the return.
+                </div>
+            @endif
+        </div>
+    @endif
+
     @if(session('success'))
         <div class="mb-8 p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl flex items-center gap-3">
             <i data-lucide="check-circle" style="width:20px;height:20px;color:#059669"></i>
@@ -456,12 +499,31 @@
 
                     <form action="{{ route('user.book.seats', $trip->id) }}" method="POST" id="booking-form" class="mt-6">
                         @csrf
+                        @if($isRoundTrip)
+                            <input type="hidden" name="trip_type" value="round_trip">
+                            <input type="hidden" name="leg" value="{{ $rtCtx['leg'] ?? 'outbound' }}">
+                            @if(!empty($rtCtx['return_date']))
+                                <input type="hidden" name="return_date" value="{{ $rtCtx['return_date'] }}">
+                            @endif
+                            @if(!empty($rtCtx['outbound_booking_id']))
+                                <input type="hidden" name="outbound_booking_id" value="{{ $rtCtx['outbound_booking_id'] }}">
+                            @endif
+                            <input type="hidden" name="from" value="{{ request('from') }}">
+                            <input type="hidden" name="to" value="{{ request('to') }}">
+                            <input type="hidden" name="date" value="{{ request('date') }}">
+                        @endif
                         <div id="hidden-inputs"></div>
                         <button type="submit" id="checkout-btn" disabled
                                 class="w-full py-4 rounded-xl font-bold text-white transition-all
                                        bg-slate-300 cursor-not-allowed
                                        hover:bg-primary-700 disabled:opacity-50">
-                            Continue to Details →
+                            @if($isRoundTrip && !$isReturnLeg)
+                                Continue → Pick Return Trip
+                            @elseif($isRoundTrip && $isReturnLeg)
+                                Continue to Passenger Details →
+                            @else
+                                Continue to Details →
+                            @endif
                         </button>
                     </form>
                 </div>
