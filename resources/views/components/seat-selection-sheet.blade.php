@@ -88,10 +88,11 @@
                 </h2>
             </div>
 
-            <!-- Premium Rounded Pill Yellow Coupon Badge inside Seat Modal Header -->
-            <div class="shrink-0 bg-[#fef9c3] text-[#854d0e] border border-[#fde047] px-4 py-1 text-[11px] font-black uppercase tracking-wider shadow-sm select-none mr-2 rounded-full">
+            <!-- Premium Rounded Pill Yellow Coupon Badge inside Seat Modal Header (Interactive) -->
+            <button type="button" onclick="SeatSheet.openCouponModal()" 
+                    class="shrink-0 bg-[#fef9c3] text-[#854d0e] border border-[#fde047] px-4 py-1 text-[11px] font-black uppercase tracking-wider shadow-sm select-none mr-2 rounded-full cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-transform focus:outline-none">
                 TRY NEW ₱50 OFF
-            </div>
+            </button>
 
             @if($trip->available_seats <= 5)
                 <span class="shrink-0 text-xs font-bold text-red-600 bg-red-50 px-2.5 py-1 rounded-full">
@@ -363,3 +364,45 @@
         </div>
     </div>
 </form>
+
+<!-- Coupon Details Modal -->
+<div id="coupon-detail-modal" class="hidden fixed inset-0 z-[300] flex items-center justify-center p-4">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/60" onclick="SeatSheet.closeCouponModal()"></div>
+    
+    <!-- Modal Container -->
+    <div class="bg-white rounded-[28px] shadow-2xl max-w-[35rem] w-full p-8 relative z-10 animate-in fade-in zoom-in-95 duration-200">
+        <!-- Close Button -->
+        <button type="button" onclick="SeatSheet.closeCouponModal()" 
+                class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 transition-colors">
+            <i data-lucide="x" style="width:16px;height:16px;color:#475569"></i>
+        </button>
+        
+        <!-- Coupon Card Content -->
+        <div class="flex flex-col items-center mt-4">
+            <!-- Ticket-shaped yellow coupon badge -->
+            <div class="flex flex-col items-center justify-center text-slate-800 px-5 py-2.5 select-none" 
+                 style="background: radial-gradient(circle at 0px 50%, transparent 5px, #fef08a 6px) left / 51% 100% no-repeat, radial-gradient(circle at 100% 50%, transparent 5px, #fef08a 6px) right / 51% 100% no-repeat; border-radius: 8px; min-width: 130px; height: 52px; box-shadow: 0 4px 12px -2px rgba(234,88,12,0.08);">
+                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider leading-none">Try new</span>
+                <span class="text-[15px] font-black text-slate-900 uppercase tracking-tight leading-none mt-1.5">₱50 OFF</span>
+            </div>
+            
+            <!-- Title -->
+            <h3 class="text-lg font-extrabold text-slate-900 text-center mt-6">
+                Try a new bus operator
+            </h3>
+            
+            <!-- Description -->
+            <p class="text-sm text-slate-500 text-center mt-3 leading-relaxed">
+                Get a discount by travelling with a bus operator you haven't tried, only on Mindanao Express.
+            </p>
+            
+            <!-- Okay Button -->
+            <button type="button" onclick="SeatSheet.closeCouponModal()"
+                    class="w-full mt-8 py-3.5 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-full transition-all shadow-lg shadow-orange-600/10 hover:shadow-orange-600/20 text-sm">
+                Okay
+            </button>
+        </div>
+    </div>
+</div>
+

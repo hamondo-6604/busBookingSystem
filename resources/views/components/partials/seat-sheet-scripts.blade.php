@@ -208,6 +208,21 @@ window.SeatSheet = {
         const content = document.getElementById('seat-sheet-content');
         if (content) content.innerHTML = '';
     },
+
+    openCouponModal() {
+        const modal = document.getElementById('coupon-detail-modal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+    },
+
+    closeCouponModal() {
+        const modal = document.getElementById('coupon-detail-modal');
+        if (modal) {
+            modal.classList.add('hidden');
+        }
+    },
 };
 
 document.addEventListener('keydown', (e) => {
