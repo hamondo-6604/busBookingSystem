@@ -137,8 +137,22 @@
                     </div>
                     <div>
                         <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Time</div>
-                        <div class="font-bold text-slate-900">{{ \Carbon\Carbon::parse($lb->trip->departure_time)->format('h:i A') }}</div>
+                        <div class="font-bold text-slate-900">{{ \Carbon\Carbon::parse($lb->departure_time_for_stop)->format('h:i A') }}</div>
                     </div>
+                    @if($lb->boardingStop)
+                        <div class="col-span-2">
+                            <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Boarding Point</div>
+                            <div class="font-bold text-slate-900">{{ $lb->boardingStop->name }}</div>
+                            <div class="text-xs text-slate-500 mt-0.5">{{ $lb->boardingStop->address }}</div>
+                        </div>
+                    @endif
+                    @if($lb->droppingStop)
+                        <div class="col-span-2">
+                            <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Dropping Point</div>
+                            <div class="font-bold text-slate-900">{{ $lb->droppingStop->name }}</div>
+                            <div class="text-xs text-slate-500 mt-0.5">{{ $lb->droppingStop->address }}</div>
+                        </div>
+                    @endif
                     <div>
                         <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Bus Class</div>
                         <div class="font-bold text-slate-900">{{ $lb->trip->bus?->type?->type_name ?? 'Economy' }}</div>

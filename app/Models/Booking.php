@@ -17,6 +17,8 @@ class Booking extends Model
     protected $fillable = [
         'user_id',
         'trip_id',
+        'boarding_stop_id',
+        'dropping_stop_id',
         'trip_type',         // 'one_way' or 'round_trip'
         'return_booking_id', // outbound booking points at its return leg
         'is_return_leg',     // true on the return-leg row of a round-trip pair
@@ -68,6 +70,16 @@ class Booking extends Model
     public function trip(): BelongsTo
     {
         return $this->belongsTo(Trip::class);
+    }
+
+    public function boardingStop(): BelongsTo
+    {
+        return $this->belongsTo(Stop::class, 'boarding_stop_id');
+    }
+
+    public function droppingStop(): BelongsTo
+    {
+        return $this->belongsTo(Stop::class, 'dropping_stop_id');
     }
 
     /** Primary seat (single-seat bookings / backwards compatibility). */
@@ -133,6 +145,28 @@ class Booking extends Model
     public function getRouteAttribute(): ?BusRoute
     {
         return $this->trip?->route;
+    }
+
+    public function getDepartureTimeForStopAttribute()
+    {
+        if ($this->boarding_stop_id && $this->boardingStop && $this->trip && $this->trip->route) {
+            $pivot = $this->trip->route->stops()->where('stop_id', $this->boarding_stop_id)->first()?->pivot;
+            if ($pivot) {
+                return $this->trip->departure_time->copy()->addMinutes($pivot->minutes_from_origin);
+            }
+        }
+        return $this->trip?->departure_time;
+    }
+
+    public function getArrivalTimeForStopAttribute()
+    {
+        if ($this->dropping_stop_id && $this->droppingStop && $this->trip && $this->trip->route) {
+            $pivot = $this->trip->route->stops()->where('stop_id', $this->dropping_stop_id)->first()?->pivot;
+            if ($pivot) {
+                return $this->trip->departure_time->copy()->addMinutes($pivot->minutes_from_origin);
+            }
+        }
+        return $this->trip?->arrival_time;
     }
 
     public function getEffectiveSeatTypeAttribute(): string

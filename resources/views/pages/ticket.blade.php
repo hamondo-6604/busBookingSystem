@@ -48,6 +48,37 @@
           </div>
         </div>
 
+        @if($booking->boardingStop || $booking->droppingStop)
+          <div class="mb-8 p-5 bg-slate-50 border border-slate-100 rounded-2xl text-xs space-y-2.5">
+            @if($booking->boardingStop)
+              <div class="flex items-start gap-2">
+                <i data-lucide="map-pin" style="width:14px;height:14px;color:#ea580c;flex-shrink:0" class="mt-0.5"></i>
+                <p class="text-slate-600 leading-normal">
+                  <strong class="text-slate-800">Boarding Point:</strong>
+                  {{ $booking->boardingStop->name }}
+                  <span class="font-extrabold text-slate-900">({{ \Carbon\Carbon::parse($booking->departure_time_for_stop)->format('g:i A') }})</span>
+                  @if($booking->boardingStop->address)
+                    <br><span class="text-slate-400 font-medium">{{ $booking->boardingStop->address }}</span>
+                  @endif
+                </p>
+              </div>
+            @endif
+            @if($booking->droppingStop)
+              <div class="flex items-start gap-2 pt-2 border-t border-slate-200/50">
+                <i data-lucide="map-pin" style="width:14px;height:14px;color:#10b981;flex-shrink:0" class="mt-0.5"></i>
+                <p class="text-slate-600 leading-normal">
+                  <strong class="text-slate-800">Dropping Point:</strong>
+                  {{ $booking->droppingStop->name }}
+                  <span class="font-extrabold text-slate-900">({{ \Carbon\Carbon::parse($booking->arrival_time_for_stop)->format('g:i A') }})</span>
+                  @if($booking->droppingStop->address)
+                    <br><span class="text-slate-400 font-medium">{{ $booking->droppingStop->address }}</span>
+                  @endif
+                </p>
+              </div>
+            @endif
+          </div>
+        @endif
+
         <div class="grid grid-cols-2 md:grid-cols-5 gap-6 bg-slate-50 rounded-2xl p-6 border border-slate-100">
           <div>
             <p class="text-xs text-slate-500 mb-1 font-semibold uppercase tracking-wider">Passenger</p>
@@ -56,7 +87,7 @@
           <div>
             <p class="text-xs text-slate-500 mb-1 font-semibold uppercase tracking-wider">Date & Time</p>
             <p class="text-sm font-bold text-slate-900">{{ $booking->trip?->departure_time?->format('M j, Y') ?? '—' }}</p>
-            <p class="text-xs font-semibold text-slate-600">{{ $booking->trip?->departure_time?->format('g:i A') ?? '—' }}</p>
+            <p class="text-xs font-semibold text-slate-600">{{ \Carbon\Carbon::parse($booking->departure_time_for_stop)->format('g:i A') }}</p>
           </div>
           <div>
             <p class="text-xs text-slate-500 mb-1 font-semibold uppercase tracking-wider">Seat(s)</p>

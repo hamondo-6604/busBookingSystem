@@ -6,6 +6,7 @@
   .trip-card { transition: box-shadow .2s, transform .2s; }
   .trip-card:hover { box-shadow: 0 12px 32px rgba(0,0,0,.09); transform: translateY(-2px); }
 </style>
+@include('components.partials.seat-sheet-styles')
 @endpush
 
 @section('content')
@@ -266,34 +267,40 @@
           };
           $seatsLow = $trip->available_seats <= 5;
         @endphp
-        <div class="trip-card bg-white border border-slate-200 rounded-2xl overflow-hidden"
+        <div class="trip-card bg-white border border-slate-200 rounded-2xl relative"
              data-class="{{ $type }}"
              data-departure="{{ $dep->format('H:i') }}"
              data-price="{{ $trip->fare }}"
              data-seats="{{ $trip->available_seats }}">
 
+          <!-- Premium Rounded Pill Yellow Coupon Badge -->
+          <div class="absolute top-0 right-8 -translate-y-1/2 bg-[#fef9c3] text-[#854d0e] border border-[#fde047] px-4 py-1 text-[11px] font-black uppercase tracking-wider shadow-sm select-none rounded-full" 
+               style="z-index: 10;">
+              TRY NEW ₱50 OFF
+          </div>
+
           <div class="p-5">
-            <div class="flex flex-wrap items-start gap-4">
+            <div class="grid grid-cols-1 lg:grid-cols-3 items-center gap-6">
 
               {{-- Operator --}}
-              <div class="flex items-center gap-3 min-w-0 flex-1">
-                <div class="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center shrink-0">
-                  <i data-lucide="bus" style="width:18px;height:18px;color:#ea580c"></i>
+              <div class="flex items-center gap-3.5 min-w-0">
+                <div class="w-11 h-11 bg-orange-50 rounded-xl flex items-center justify-center shrink-0 border border-orange-100/50">
+                  <i data-lucide="bus" style="width:20px;height:20px;color:#ea580c"></i>
                 </div>
                 <div class="min-w-0">
-                  <div class="text-sm font-bold text-slate-900 truncate">
+                  <div class="text-base font-extrabold text-slate-900 truncate">
                     {{ $trip->bus?->bus_name ?? 'Mindanao Express Bus' }}
                   </div>
-                  <div class="flex flex-wrap items-center gap-2 mt-0.5">
-                    <span class="text-xs px-2 py-0.5 rounded-full font-semibold {{ $typeBadge }}">
+                  <div class="flex flex-wrap items-center gap-2 mt-1">
+                    <span class="text-[11px] px-2.5 py-0.5 rounded-full font-bold {{ $typeBadge }}">
                       {{ ucfirst($type) }}
                     </span>
-                    <span class="text-xs text-slate-400">
+                    <span class="text-xs text-slate-400 font-semibold">
                       {{ $trip->bus?->type?->type_name }}
                     </span>
                     @if($trip->departureTerminal)
-                      <span class="text-xs text-slate-400 flex items-center gap-0.5">
-                        <i data-lucide="building-2" style="width:10px;height:10px"></i>
+                      <span class="text-xs text-slate-400 font-medium flex items-center gap-0.5">
+                        <i data-lucide="map-pin" style="width:11px;height:11px;color:#ea580c"></i>
                         {{ $trip->departureTerminal->name }}
                       </span>
                     @endif
@@ -302,45 +309,52 @@
               </div>
 
               {{-- Time + duration --}}
-              <div class="flex items-center gap-4 shrink-0">
-                <div class="text-center">
-                  <div class="text-xl font-extrabold text-slate-900">{{ $dep->format('H:i') }}</div>
-                  <div class="text-[10px] text-slate-400 mt-0.5">
-                    {{ $trip->route?->originCity?->name }}
-                  </div>
+              <div class="flex items-center justify-center gap-6 w-full lg:justify-self-center py-2 lg:py-0 border-y lg:border-y-0 border-slate-100/60 lg:my-0 my-2">
+                <div class="text-center min-w-[75px]">
+                  <div class="text-2xl font-black text-slate-900 leading-none tracking-tight">{{ $dep->format('H:i') }}</div>
+                  <div class="text-xs text-slate-400 font-bold mt-2 truncate max-w-[100px]">{{ $trip->route?->originCity?->name }}</div>
                 </div>
-                <div class="flex flex-col items-center gap-1 w-20">
-                  <span class="text-[10px] text-slate-400">{{ $durStr }}</span>
-                  <div class="w-full flex items-center">
-                    <div class="w-1.5 h-1.5 rounded-full bg-primary-400"></div>
-                    <div class="flex-1 h-px bg-slate-200"></div>
-                    <i data-lucide="bus" style="width:11px;height:11px;color:#ea580c"></i>
-                    <div class="flex-1 h-px bg-slate-200"></div>
-                    <div class="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
+                
+                <div class="flex flex-col items-center gap-1.5 w-24 shrink-0">
+                  <span class="text-[10px] font-bold text-slate-400 tracking-wide uppercase">{{ $durStr }}</span>
+                  <div class="w-full flex items-center relative py-1">
+                    <!-- Left Orange Dot -->
+                    <div class="w-2.5 h-2.5 rounded-full bg-orange-500 shrink-0 shadow-sm shadow-orange-500/20"></div>
+                    
+                    <!-- Thin Connector Line -->
+                    <div class="flex-1 h-[2px] bg-slate-200"></div>
+                    
+                    <!-- Filled Orange Bus Icon in center -->
+                    <div class="mx-1 shrink-0 bg-white px-1 z-10 relative">
+                      <i data-lucide="bus" style="width:13px;height:13px;color:#ea580c;fill:#ea580c;transform:scaleX(-1)"></i>
+                    </div>
+                    
+                    <!-- Thin Connector Line -->
+                    <div class="flex-1 h-[2px] bg-slate-200"></div>
+                    
+                    <!-- Right Emerald Dot -->
+                    <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0 shadow-sm shadow-emerald-500/20"></div>
                   </div>
-                  <span class="text-[10px] text-slate-400">Direct</span>
+                  <span class="text-[10px] font-bold text-slate-400 tracking-wide uppercase">Direct</span>
                 </div>
-                <div class="text-center">
-                  <div class="text-xl font-extrabold text-slate-900">
-                    {{ $arr?->format('H:i') ?? '—' }}
-                  </div>
-                  <div class="text-[10px] text-slate-400 mt-0.5">
-                    {{ $trip->route?->destinationCity?->name }}
-                  </div>
+                
+                <div class="text-center min-w-[75px]">
+                  <div class="text-2xl font-black text-slate-900 leading-none tracking-tight">{{ $arr?->format('H:i') ?? '—' }}</div>
+                  <div class="text-xs text-slate-400 font-bold mt-2 truncate max-w-[100px]">{{ $trip->route?->destinationCity?->name }}</div>
                 </div>
               </div>
 
               {{-- Fare + CTA --}}
-              <div class="text-right shrink-0 ml-auto">
-                <div class="text-xs text-slate-400">per person</div>
-                <div class="text-2xl font-extrabold text-primary-600">
+              <div class="text-right shrink-0 lg:ml-auto w-full lg:w-auto flex flex-col items-end justify-center">
+                <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 leading-none">per person</div>
+                <div class="text-3xl font-black text-orange-600 mt-1 tracking-tight leading-none">
                   ₱{{ number_format($trip->fare, 0) }}
                 </div>
 
                 @auth
                   @if(auth()->user()->discountType?->percentage > 0)
                     @php $discounted = auth()->user()->calculateFare((float)$trip->fare); @endphp
-                    <div class="text-xs text-emerald-600 font-semibold">
+                    <div class="text-xs text-emerald-600 font-semibold mt-1">
                       You pay ₱{{ number_format($discounted, 0) }}
                       <span class="text-slate-400 font-normal">
                         ({{ number_format(auth()->user()->discountType->percentage * 100, 0) }}% off)
@@ -350,30 +364,28 @@
                 @endauth
 
                 <button onclick="bookTrip({{ $trip->id }})"
-                        class="mt-2 px-5 py-2 bg-primary-600 hover:bg-primary-700 text-white
-                               text-xs font-bold rounded-xl transition-colors">
-                  {{ $isReturnLegSearch ? 'Select Return Seat →' : 'Select Seat →' }}
+                        class="mt-3 px-6 py-2.5 bg-orange-600 hover:bg-orange-700 text-white
+                               text-xs font-bold rounded-full transition-all shadow-sm shadow-orange-600/10 hover:shadow-md hover:translate-y-[-1px] active:translate-y-0 flex items-center gap-1.5">
+                  <span>{{ $isReturnLegSearch ? 'Select Return Seat' : 'Select Seat' }}</span>
+                  <i data-lucide="arrow-right" style="width:13px;height:13px"></i>
                 </button>
               </div>
 
             </div>
 
             {{-- Footer: amenities + seat count --}}
-            <div class="flex flex-wrap items-center gap-3 mt-4 pt-4 border-t border-slate-100">
+            <div class="flex flex-wrap items-center justify-between gap-3 mt-4 pt-4 border-t border-slate-100">
               <div class="flex flex-wrap gap-2">
                 @foreach($trip->bus?->amenities ?? [] as $amenity)
-                  <span class="flex items-center gap-1 text-[10px] text-slate-500
-                               bg-slate-50 border border-slate-100 px-2 py-1 rounded-lg">
-                    <i data-lucide="{{ $amenity->icon ?? 'check' }}"
-                       style="width:10px;height:10px;color:#ea580c"></i>
+                  <span class="text-[11px] text-slate-600 font-bold bg-slate-100/70 px-3 py-1 rounded-full border border-slate-200/20 shadow-sm">
                     {{ $amenity->display_name }}
                   </span>
                 @endforeach
               </div>
-              <div class="ml-auto flex items-center gap-1.5 text-xs font-semibold
+              <div class="flex items-center gap-1.5 text-xs font-bold
                           {{ $seatsLow ? 'text-red-600' : 'text-emerald-600' }}">
                 <i data-lucide="{{ $seatsLow ? 'alert-circle' : 'check-circle' }}"
-                   style="width:13px;height:13px"></i>
+                   style="width:14px;height:14px"></i>
                 {{ $trip->available_seats }} seat{{ $trip->available_seats !== 1 ? 's' : '' }}
                 {{ $seatsLow ? 'left — book fast!' : 'available' }}
               </div>
@@ -565,6 +577,15 @@
 
 </div>
 
+{{-- Seat selection bottom sheet (redBus-style) --}}
+<div id="seat-sheet-overlay" class="fixed inset-0 z-[200]" data-mode="modal">
+  <div class="absolute inset-0 bg-black/50" onclick="SeatSheet.close()"></div>
+  <div id="seat-sheet-panel"
+       class="fixed left-0 right-0 bottom-0 top-[10vh] bg-white rounded-t-2xl shadow-2xl flex flex-col overflow-hidden">
+    <div id="seat-sheet-content" class="flex-1 flex flex-col min-h-0 overflow-hidden"></div>
+  </div>
+</div>
+
 @endsection
 
 @push('scripts')
@@ -663,7 +684,17 @@
     }
 
     const qs = params.toString();
-    requireAuth('/select-seats/' + tripId + (qs ? '?' + qs : ''));
+    const url = '/select-seats/' + tripId + (qs ? '?' + qs : '');
+    @auth
+      if (typeof SeatSheet !== 'undefined') {
+        SeatSheet.open(url);
+      } else {
+        window.location.href = url;
+      }
+    @else
+      requireAuth(url);
+    @endauth
   }
 </script>
+@include('components.partials.seat-sheet-scripts')
 @endpush

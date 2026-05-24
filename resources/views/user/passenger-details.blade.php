@@ -61,15 +61,36 @@
                                         {{ $legBooking->trip?->route?->originCity?->name }} →
                                         {{ $legBooking->trip?->route?->destinationCity?->name }}
                                         · {{ \Carbon\Carbon::parse($legBooking->trip?->trip_date)->format('D, M j, Y') }}
-                                        · {{ \Carbon\Carbon::parse($legBooking->trip?->departure_time)->format('h:i A') }}
+                                        · {{ \Carbon\Carbon::parse($legBooking->departure_time_for_stop)->format('h:i A') }}
+                                        @if($legBooking->boardingStop || $legBooking->droppingStop)
+                                            <div class="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-slate-600 font-medium">
+                                                @if($legBooking->boardingStop)
+                                                    <span class="inline-flex items-center gap-1"><i data-lucide="map-pin" style="width:12px;height:12px;color:#ea580c"></i> Board: {{ $legBooking->boardingStop->name }}</span>
+                                                @endif
+                                                @if($legBooking->droppingStop)
+                                                    <span class="inline-flex items-center gap-1"><i data-lucide="map-pin" style="width:12px;height:12px;color:#10b981"></i> Drop: {{ $legBooking->droppingStop->name }}</span>
+                                                @endif
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
                         @else
-                            <h2 class="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
+                            <h2 class="text-lg font-bold text-slate-900 mb-2 flex items-center gap-2">
                                 <i data-lucide="users" style="width:20px;height:20px;color:#ea580c"></i>
                                 Who's traveling?
                             </h2>
+                            <div class="text-xs text-slate-500 mb-6 flex flex-wrap gap-x-3 gap-y-1">
+                                <span>{{ $legBooking->trip?->route?->originCity?->name }} → {{ $legBooking->trip?->route?->destinationCity?->name }}</span>
+                                <span>· {{ \Carbon\Carbon::parse($legBooking->trip?->trip_date)->format('D, M j, Y') }}</span>
+                                <span>· {{ \Carbon\Carbon::parse($legBooking->departure_time_for_stop)->format('h:i A') }}</span>
+                                @if($legBooking->boardingStop)
+                                    <span class="text-slate-600 font-medium flex items-center gap-0.5"><i data-lucide="map-pin" style="width:12px;height:12px;color:#ea580c"></i> Board: {{ $legBooking->boardingStop->name }}</span>
+                                @endif
+                                @if($legBooking->droppingStop)
+                                    <span class="text-slate-600 font-medium flex items-center gap-0.5"><i data-lucide="map-pin" style="width:12px;height:12px;color:#10b981"></i> Drop: {{ $legBooking->droppingStop->name }}</span>
+                                @endif
+                            </div>
                         @endif
 
                         <div class="space-y-8">
@@ -156,18 +177,22 @@
                                     {{ \Carbon\Carbon::parse($lb->trip->trip_date)->format('D, M j, Y') }}
                                 </div>
                                 <div class="flex justify-between items-center">
-                                    <div>
-                                        <div class="text-lg font-extrabold text-slate-900">{{ \Carbon\Carbon::parse($lb->trip->departure_time)->format('h:i A') }}</div>
-                                        <div class="text-[11px] text-slate-500 mt-0.5">{{ $lb->trip->route?->originCity?->name }}</div>
+                                    <div class="max-w-[40%] min-w-0">
+                                        <div class="text-lg font-extrabold text-slate-900">{{ \Carbon\Carbon::parse($lb->departure_time_for_stop)->format('h:i A') }}</div>
+                                        <div class="text-[11px] text-slate-500 mt-0.5 truncate" title="{{ $lb->boardingStop?->name ?? $lb->trip->departureTerminal?->name ?? $lb->trip->route?->originCity?->name }}">
+                                            {{ $lb->boardingStop?->name ?? $lb->trip->departureTerminal?->name ?? $lb->trip->route?->originCity?->name }}
+                                        </div>
                                     </div>
-                                    <div class="flex-1 px-3 flex items-center">
+                                    <div class="flex-1 px-2 flex items-center">
                                         <div class="h-px bg-slate-300 flex-1"></div>
                                         <i data-lucide="bus" style="width:14px;height:14px;color:#ea580c;margin:0 6px"></i>
                                         <div class="h-px bg-slate-300 flex-1"></div>
                                     </div>
-                                    <div class="text-right">
-                                        <div class="text-lg font-extrabold text-slate-900">{{ $lb->trip->arrival_time ? \Carbon\Carbon::parse($lb->trip->arrival_time)->format('h:i A') : '—' }}</div>
-                                        <div class="text-[11px] text-slate-500 mt-0.5">{{ $lb->trip->route?->destinationCity?->name }}</div>
+                                    <div class="text-right max-w-[40%] min-w-0">
+                                        <div class="text-lg font-extrabold text-slate-900">{{ $lb->arrival_time_for_stop ? \Carbon\Carbon::parse($lb->arrival_time_for_stop)->format('h:i A') : '—' }}</div>
+                                        <div class="text-[11px] text-slate-500 mt-0.5 truncate" title="{{ $lb->droppingStop?->name ?? $lb->trip->arrivalTerminal?->name ?? $lb->trip->route?->destinationCity?->name }}">
+                                            {{ $lb->droppingStop?->name ?? $lb->trip->arrivalTerminal?->name ?? $lb->trip->route?->destinationCity?->name }}
+                                        </div>
                                     </div>
                                 </div>
                             </div>

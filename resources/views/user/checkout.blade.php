@@ -206,9 +206,22 @@
                                     <div class="text-sm font-semibold text-slate-800">
                                         {{ $booking->trip->route?->originCity?->name }} → {{ $booking->trip->route?->destinationCity?->name }}
                                     </div>
-                                    <div class="text-xs text-slate-500">
-                                        {{ \Carbon\Carbon::parse($booking->trip->trip_date)->format('M j, Y') }}
-                                        · {{ $booking->bookingSeats->count() }} seat(s)
+                                    <div class="text-xs text-slate-500 space-y-0.5">
+                                        <div>
+                                            {{ \Carbon\Carbon::parse($booking->trip->trip_date)->format('M j, Y') }}
+                                            · {{ $booking->bookingSeats->count() }} seat(s)
+                                            · {{ \Carbon\Carbon::parse($booking->departure_time_for_stop)->format('h:i A') }}
+                                        </div>
+                                        @if($booking->boardingStop || $booking->droppingStop)
+                                            <div class="text-slate-600 font-medium text-[11px] flex flex-wrap gap-x-2">
+                                                @if($booking->boardingStop)
+                                                    <span>Board: {{ $booking->boardingStop->name }}</span>
+                                                @endif
+                                                @if($booking->droppingStop)
+                                                    <span>Drop: {{ $booking->droppingStop->name }}</span>
+                                                @endif
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                                 <div class="border-t border-slate-200/70"></div>
@@ -217,24 +230,49 @@
                                     <div class="text-sm font-semibold text-slate-800">
                                         {{ $rb->trip->route?->originCity?->name }} → {{ $rb->trip->route?->destinationCity?->name }}
                                     </div>
-                                    <div class="text-xs text-slate-500">
-                                        {{ \Carbon\Carbon::parse($rb->trip->trip_date)->format('M j, Y') }}
-                                        · {{ $rb->bookingSeats->count() }} seat(s)
+                                    <div class="text-xs text-slate-500 space-y-0.5">
+                                        <div>
+                                            {{ \Carbon\Carbon::parse($rb->trip->trip_date)->format('M j, Y') }}
+                                            · {{ $rb->bookingSeats->count() }} seat(s)
+                                            · {{ \Carbon\Carbon::parse($rb->departure_time_for_stop)->format('h:i A') }}
+                                        </div>
+                                        @if($rb->boardingStop || $rb->droppingStop)
+                                            <div class="text-slate-600 font-medium text-[11px] flex flex-wrap gap-x-2">
+                                                @if($rb->boardingStop)
+                                                    <span>Board: {{ $rb->boardingStop->name }}</span>
+                                                @endif
+                                                @if($rb->droppingStop)
+                                                    <span>Drop: {{ $rb->droppingStop->name }}</span>
+                                                @endif
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
                         @else
                             <div class="flex justify-between text-sm mb-2">
                                 <span class="text-slate-600">Route</span>
-                                <span class="font-semibold text-slate-900">{{ $booking->trip->route?->originCity?->name }} → {{ $booking->trip->route?->destinationCity?->name }}</span>
+                                <span class="font-semibold text-slate-900 text-right">{{ $booking->trip->route?->originCity?->name }} → {{ $booking->trip->route?->destinationCity?->name }}</span>
                             </div>
+                            @if($booking->boardingStop)
+                                <div class="flex justify-between text-sm mb-2">
+                                    <span class="text-slate-600">Boarding Point</span>
+                                    <span class="font-semibold text-slate-900 text-right">{{ $booking->boardingStop->name }} ({{ \Carbon\Carbon::parse($booking->departure_time_for_stop)->format('h:i A') }})</span>
+                                </div>
+                            @endif
+                            @if($booking->droppingStop)
+                                <div class="flex justify-between text-sm mb-2">
+                                    <span class="text-slate-600">Dropping Point</span>
+                                    <span class="font-semibold text-slate-900 text-right">{{ $booking->droppingStop->name }} ({{ \Carbon\Carbon::parse($booking->arrival_time_for_stop)->format('h:i A') }})</span>
+                                </div>
+                            @endif
                             <div class="flex justify-between text-sm mb-2">
                                 <span class="text-slate-600">Date</span>
-                                <span class="font-semibold text-slate-900">{{ \Carbon\Carbon::parse($booking->trip->trip_date)->format('M j, Y') }}</span>
+                                <span class="font-semibold text-slate-900 text-right">{{ \Carbon\Carbon::parse($booking->trip->trip_date)->format('M j, Y') }}</span>
                             </div>
                             <div class="flex justify-between text-sm">
                                 <span class="text-slate-600">Passengers</span>
-                                <span class="font-semibold text-slate-900">{{ $booking->bookingSeats->count() }}</span>
+                                <span class="font-semibold text-slate-900 text-right">{{ $booking->bookingSeats->count() }}</span>
                             </div>
                         @endif
                     </div>

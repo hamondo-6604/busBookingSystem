@@ -237,8 +237,13 @@ class TicketBookingController extends Controller
             'route.destinationCity',
             'bus.type',
             'bus.seatLayout',
+            'bus.amenities',
             'departureTerminal',
+            'arrivalTerminal',
+            'feedback',
         ])->findOrFail($trip_id);
+
+        $trip->feedback_avg_rating = $trip->feedback->avg('rating');
 
         $existingSeatsCount = BookingSeat::whereHas('booking', function ($q) use ($trip) {
             $q->where('trip_id', $trip->id)
@@ -272,10 +277,16 @@ class TicketBookingController extends Controller
             'outbound_booking_id' => $outboundBookingId,
         ];
 
-        return view('user.select-seats', compact(
+        $viewData = compact(
             'trip', 'seatMap', 'remainingAllowed',
             'roundTripContext', 'outboundBooking'
-        ));
+        );
+
+        if ($request->ajax()) {
+            return view('components.seat-selection-sheet', $viewData);
+        }
+
+        return view('user.select-seats', $viewData);
     }
 
     // ------------------------------------------------------------------
@@ -290,6 +301,8 @@ class TicketBookingController extends Controller
             'leg'                 => 'nullable|in:outbound,return',
             'return_date'         => 'nullable|date',
             'outbound_booking_id' => 'nullable|integer|exists:bookings,id',
+            'boarding_stop_id'    => 'nullable|integer|exists:stops,id',
+            'dropping_stop_id'    => 'nullable|integer|exists:stops,id',
         ]);
 
         $trip      = Trip::findOrFail($trip_id);
@@ -386,18 +399,20 @@ class TicketBookingController extends Controller
 
         $booking = DB::transaction(function () use (
             $trip, $totalFare, $bookingSeatsData,
-            $isRoundTrip, $isReturnLeg, $outboundBooking
+            $isRoundTrip, $isReturnLeg, $outboundBooking, $request
         ) {
             $newBooking = Booking::create([
-                'user_id'        => auth()->id(),
-                'trip_id'        => $trip->id,
-                'trip_type'      => $isRoundTrip ? 'round_trip' : 'one_way',
-                'is_return_leg'  => $isReturnLeg,
-                'seat_id'        => $bookingSeatsData[0]['seat_id'] ?? null,
-                'status'         => 'pending',
-                'base_fare'      => $totalFare,
-                'amount_paid'    => 0,
-                'payment_status' => 'unpaid',
+                'user_id'          => auth()->id(),
+                'trip_id'          => $trip->id,
+                'boarding_stop_id' => $request->input('boarding_stop_id'),
+                'dropping_stop_id' => $request->input('dropping_stop_id'),
+                'trip_type'        => $isRoundTrip ? 'round_trip' : 'one_way',
+                'is_return_leg'    => $isReturnLeg,
+                'seat_id'          => $bookingSeatsData[0]['seat_id'] ?? null,
+                'status'           => 'pending',
+                'base_fare'        => $totalFare,
+                'amount_paid'      => 0,
+                'payment_status'   => 'unpaid',
             ]);
 
             foreach ($bookingSeatsData as $data) {
