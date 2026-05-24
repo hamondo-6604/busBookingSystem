@@ -388,12 +388,12 @@
             </div>
             
             <!-- Title -->
-            <h3 class="text-lg font-extrabold text-slate-900 text-center mt-6">
+            <h3 class="text-[22px] font-extrabold text-slate-900 text-center mt-6">
                 Try a new bus operator
             </h3>
             
             <!-- Description -->
-            <p class="text-sm text-slate-500 text-center mt-3 leading-relaxed">
+            <p class="text-[16px] text-slate-500 text-center mt-3 leading-relaxed">
                 Get a discount by travelling with a bus operator you haven't tried, only on Mindanao Express.
             </p>
             
